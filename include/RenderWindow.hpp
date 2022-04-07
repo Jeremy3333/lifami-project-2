@@ -16,6 +16,8 @@ public:
     void drawLine(float x1, float y1, float x2, float y2);
     void drawPoint(float x, float y);
     void drawBackground();
+    void drawTexture(SDL_Texture *p_texture, int p_x, int p_y, float heightModifier);
+    void textureFlip(SDL_Texture *p_texture);
 
 private:
     SDL_Window *window;

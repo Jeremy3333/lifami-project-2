@@ -139,3 +139,16 @@ void RenderWindow::drawBackground()
     rect.h = height;
     SDL_RenderFillRect(renderer, &rect);
 }
+
+void RenderWindow::drawTexture(SDL_Texture *p_texture, int p_x, int p_y, float heightModifier)
+{
+    SDL_Rect rect;
+    rect.x = p_x;
+    rect.y = p_y;
+    SDL_QueryTexture(p_texture, NULL, NULL, &rect.w, &rect.h);
+    rect.w *= heightModifier;
+    rect.h *= heightModifier;
+    rect.x -= rect.w / 2;
+    rect.y -= rect.h / 2;
+    SDL_RenderCopy(renderer, p_texture, NULL, &rect);
+}

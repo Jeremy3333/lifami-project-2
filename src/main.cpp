@@ -11,6 +11,14 @@
 #define WINDOW_TITLE "LIFAMI"
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+#define MAX_RECT_WALL 20
+#define MAX_ANGLE_WALL 20
+#define HEIGHT_MODIFIER 2
+
+#define ANIMATION_STAND_DOWN 0
+#define ANIMATION_STAND_UP 1
+#define ANIMATION_STAND_LEFT 2
+#define ANIMATION_STAND_RIGHT 3
 
 /*
  * Debug:
@@ -20,16 +28,72 @@
  * g++ -c src/*.cpp -std=c++14 -O3 -Wall -m64 -I include -I C:/SDL2-w64/include  && g++ *.o -o bin/release/main -s -L C:/SDL2-w64/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image && start bin/release/main
  */
 
-void init()
+struct player
 {
+    float x, y;
+    int animation;
+    float animation_timer;
+    SDL_Texture *texture;
+};
+
+struct rect_wall
+{
+    float x, y;
+    float width, height;
+};
+
+struct angle_wall
+{
+    float x, y;
+    float width;
+    int direction;
+};
+
+struct world
+{
+    player player;
+    rect_wall rect_walls[MAX_RECT_WALL];
+    angle_wall angle_walls[MAX_ANGLE_WALL];
+};
+
+void init(world &w, RenderWindow window)
+{
+    w.player.x = WINDOW_WIDTH / 2;
+    w.player.y = WINDOW_HEIGHT / 2;
+    w.player.animation = 0;
+    w.player.animation_timer = 0;
+    w.player.texture = window.loadTexture("res/img/lea-stand-down.png");
 }
 
-void draw(RenderWindow &window)
+void draw(RenderWindow &window, world world)
 {
+    window.color(255, 200, 200, 255);
+    window.drawBackground();
+    window.drawTexture(world.player.texture, world.player.x, world.player.y, HEIGHT_MODIFIER);
 }
 
-void update(float timeStep)
+void update(float timeStepSeconds, world &world, const Uint8 *state, RenderWindow &window)
 {
+    if (state[SDL_SCANCODE_W])
+    {
+        world.player.y -= timeStepSeconds * 500;
+        world.player.texture = window.loadTexture("res/img/lea-stand-up.png");
+    }
+    if (state[SDL_SCANCODE_S])
+    {
+        world.player.y += timeStepSeconds * 500;
+        world.player.texture = window.loadTexture("res/img/lea-stand-down.png");
+    }
+    if (state[SDL_SCANCODE_A])
+    {
+        world.player.x -= timeStepSeconds * 500;
+        world.player.texture = window.loadTexture("res/img/lea-stand-side.png");
+    }
+    if (state[SDL_SCANCODE_D])
+    {
+        world.player.x += timeStepSeconds * 500;
+        world.player.texture = window.loadTexture("res/img/lea-stand-side.png");
+    }
 }
 
 int main(int argc, char **argv)
@@ -41,9 +105,10 @@ int main(int argc, char **argv)
     SDL_Event event;
     const Uint8 *state = SDL_GetKeyboardState(NULL);
     bool quit = false;
+    world w;
 
     // initialize world
-    init();
+    init(w, window);
 
     // load media
 
@@ -64,9 +129,9 @@ int main(int argc, char **argv)
         // clear screen
         window.clear();
         // update world
-        update(timeStepS);
+        update(timeStepS, w, state, window);
         // draw
-        draw(window);
+        draw(window, w);
         // render
 
         window.display();
