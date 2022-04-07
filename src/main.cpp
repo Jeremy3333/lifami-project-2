@@ -15,6 +15,15 @@
 #define MAX_ANGLE_WALL 20
 #define HEIGHT_MODIFIER 2
 
+#define PLAYER_DIRECTION_UP 0
+#define PLAYER_DIRECTION_DOWN 1
+#define PLAYER_DIRECTION_LEFT 2
+#define PLAYER_DIRECTION_RIGHT 3
+#define PLAYER_DIRECTION_UP_LEFT 4
+#define PLAYER_DIRECTION_UP_RIGHT 5
+#define PLAYER_DIRECTION_DOWN_LEFT 6
+#define PLAYER_DIRECTION_DOWN_RIGHT 7
+
 /*
  * Debug:
  * g++ -c src/*.cpp -std=c++14 -g -Wall -m64 -I include -I C:/SDL2-w64/include  && g++ *.o -o bin/debug/main -L C:/SDL2-w64/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image && start bin/debug/main
@@ -27,6 +36,7 @@ struct player
 {
     float x, y;
     float animation_timer;
+    int direction;
     SDL_Texture *moveTexture;
     int frameWidth, frameHeight;
     SDL_Rect playerRect;
@@ -58,6 +68,7 @@ void init(world &w, RenderWindow window)
     w.player.x = WINDOW_WIDTH / 2;
     w.player.y = WINDOW_HEIGHT / 2;
     w.player.animation_timer = 0;
+    w.player.direction = PLAYER_DIRECTION_DOWN;
     {
         int textureWidth = 0;
         int textureHeight = 0;
@@ -70,20 +81,64 @@ void init(world &w, RenderWindow window)
         w.player.playerRect.w = w.player.frameWidth;
         w.player.playerRect.h = w.player.frameHeight;
     }
-    //init player texture
+}
+
+// choose wich part of the texture to draw
+void selectRect(world &w)
+{
+    switch (w.player.direction)
+    {
+        {
+        case PLAYER_DIRECTION_UP:
+            w.player.playerRect.x = w.player.frameWidth;
+            w.player.playerRect.y = w.player.frameHeight * 0;
+            break;
+        case PLAYER_DIRECTION_DOWN:
+            w.player.playerRect.x = w.player.frameWidth;
+            w.player.playerRect.y = w.player.frameHeight * 4;
+            break;
+        case PLAYER_DIRECTION_LEFT:
+            w.player.playerRect.x = w.player.frameWidth ;
+            w.player.playerRect.y = w.player.frameHeight * 2;
+            break;
+        case PLAYER_DIRECTION_RIGHT:
+            w.player.playerRect.x = w.player.frameWidth;
+            w.player.playerRect.y = w.player.frameHeight * 2;
+            break;
+        case PLAYER_DIRECTION_UP_LEFT:
+            w.player.playerRect.x = w.player.frameWidth;
+            w.player.playerRect.y = w.player.frameHeight * 1;
+            break;
+        case PLAYER_DIRECTION_UP_RIGHT:
+            w.player.playerRect.x = w.player.frameWidth;
+            w.player.playerRect.y = w.player.frameHeight * 1;
+            break;
+        case PLAYER_DIRECTION_DOWN_LEFT:
+            w.player.playerRect.x = w.player.frameWidth;
+            w.player.playerRect.y = w.player.frameHeight * 3;
+            break;
+        case PLAYER_DIRECTION_DOWN_RIGHT:
+            w.player.playerRect.x = w.player.frameWidth;
+            w.player.playerRect.y = w.player.frameHeight * 3;
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 void draw(RenderWindow &window, world world)
 {
     window.color(255, 200, 200, 255);
     window.drawBackground();
-    if(world.player.left)
+    selectRect(world);
+    if(world.player.direction == PLAYER_DIRECTION_UP || world.player.direction == PLAYER_DIRECTION_DOWN || world.player.direction == PLAYER_DIRECTION_RIGHT || world.player.direction == PLAYER_DIRECTION_DOWN_RIGHT || world.player.direction == PLAYER_DIRECTION_UP_RIGHT)
     {
-        window.drawTextureRectFlip(world.player.moveTexture, world.player.x, world.player.y, HEIGHT_MODIFIER, world.player.playerRect);
+        window.drawTextureRect(world.player.moveTexture, world.player.x, world.player.y, HEIGHT_MODIFIER, world.player.playerRect);
     }
     else
     {
-        window.drawTextureRect(world.player.moveTexture, world.player.x, world.player.y, HEIGHT_MODIFIER, world.player.playerRect);
+        window.drawTextureRectFlip(world.player.moveTexture, world.player.x, world.player.y, HEIGHT_MODIFIER, world.player.playerRect);
     }
 }
 
@@ -93,30 +148,38 @@ void update(float timeStepSeconds, world &world, const Uint8 *state)
     if (state[SDL_SCANCODE_W])
     {
         world.player.y -= timeStepSeconds * 500;
-        world.player.playerRect.x = world.player.frameWidth * 1;
-        world.player.playerRect.y = world.player.frameHeight * 0;
-        world.player.left = false;
+        world.player.direction = PLAYER_DIRECTION_UP;
     }
     if (state[SDL_SCANCODE_S])
     {
         world.player.y += timeStepSeconds * 500;
-        world.player.playerRect.x = world.player.frameWidth * 1;
-        world.player.playerRect.y = world.player.frameHeight * 4;
-        world.player.left = false;
+        world.player.direction = PLAYER_DIRECTION_DOWN;
     }
     if (state[SDL_SCANCODE_A])
     {
         world.player.x -= timeStepSeconds * 500;
-        world.player.playerRect.x = world.player.frameWidth * 1;
-        world.player.playerRect.y = world.player.frameHeight * 2;
-        world.player.left = true;
+        world.player.direction = PLAYER_DIRECTION_LEFT;
     }
     if (state[SDL_SCANCODE_D])
     {
         world.player.x += timeStepSeconds * 500;
-        world.player.playerRect.x = world.player.frameWidth * 1;
-        world.player.playerRect.y = world.player.frameHeight * 2;
-        world.player.left = false;
+        world.player.direction = PLAYER_DIRECTION_RIGHT;
+    }
+    if (state[SDL_SCANCODE_W] && state[SDL_SCANCODE_A])
+    {
+        world.player.direction = PLAYER_DIRECTION_UP_LEFT;
+    }
+    if (state[SDL_SCANCODE_W] && state[SDL_SCANCODE_D])
+    {
+        world.player.direction = PLAYER_DIRECTION_UP_RIGHT;
+    }
+    if (state[SDL_SCANCODE_S] && state[SDL_SCANCODE_A])
+    {
+        world.player.direction = PLAYER_DIRECTION_DOWN_LEFT;
+    }
+    if (state[SDL_SCANCODE_S] && state[SDL_SCANCODE_D])
+    {
+        world.player.direction = PLAYER_DIRECTION_DOWN_RIGHT;
     }
 }
 
