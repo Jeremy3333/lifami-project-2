@@ -20,38 +20,6 @@
  * g++ -c src/*.cpp -std=c++14 -O3 -Wall -m64 -I include -I C:/SDL2-w64/include  && g++ *.o -o bin/release/main -s -L C:/SDL2-w64/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image && start bin/release/main
  */
 
-Vector2f initVector(float x, float y)
-{
-    Vector2f vec;
-    vec.x = x;
-    vec.y = y;
-    return vec;
-}
-
-Vector2f operator-(const Vector2f &lhs, const Vector2f &rhs)
-{
-    return initVector(lhs.x - rhs.x, lhs.y - rhs.y);
-}
-
-Vector2f operator+(const Vector2f &lhs, const Vector2f &rhs)
-{
-    return initVector(lhs.x + rhs.x, lhs.y + rhs.y);
-}
-
-Vector2f operator/(const Vector2f &lhs, float rhs)
-{
-    return initVector(lhs.x / rhs, lhs.y / rhs);
-}
-
-Vector2f operator*(const Vector2f &lhs, float rhs)
-{
-    return initVector(lhs.x * rhs, lhs.y * rhs);
-}
-Vector2f operator*(float rhs, const Vector2f &lhs)
-{
-    return initVector(lhs.x * rhs, lhs.y * rhs);
-}
-
 void init()
 {
 }
