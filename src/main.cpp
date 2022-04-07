@@ -15,11 +15,6 @@
 #define MAX_ANGLE_WALL 20
 #define HEIGHT_MODIFIER 2
 
-#define ANIMATION_STAND_DOWN 0
-#define ANIMATION_STAND_UP 1
-#define ANIMATION_STAND_LEFT 2
-#define ANIMATION_STAND_RIGHT 3
-
 /*
  * Debug:
  * g++ -c src/*.cpp -std=c++14 -g -Wall -m64 -I include -I C:/SDL2-w64/include  && g++ *.o -o bin/debug/main -L C:/SDL2-w64/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image && start bin/debug/main
@@ -31,9 +26,11 @@
 struct player
 {
     float x, y;
-    int animation;
     float animation_timer;
-    SDL_Texture *texture;
+    SDL_Texture *moveTexture;
+    int frameWidth, frameHeight;
+    SDL_Rect playerRect;
+    bool left;
 };
 
 struct rect_wall
@@ -60,39 +57,66 @@ void init(world &w, RenderWindow window)
 {
     w.player.x = WINDOW_WIDTH / 2;
     w.player.y = WINDOW_HEIGHT / 2;
-    w.player.animation = 0;
     w.player.animation_timer = 0;
-    w.player.texture = window.loadTexture("res/img/lea-stand-down.png");
+    {
+        int textureWidth = 0;
+        int textureHeight = 0;
+        w.player.moveTexture = window.loadTexture("assets/media/move.png");
+        SDL_QueryTexture(w.player.moveTexture, NULL, NULL, &textureWidth, &textureHeight);
+        w.player.frameWidth = textureWidth / 16;
+        w.player.frameHeight = textureHeight / 19;
+        w.player.playerRect.x = w.player.frameWidth;
+        w.player.playerRect.y = w.player.frameHeight * 4;
+        w.player.playerRect.w = w.player.frameWidth;
+        w.player.playerRect.h = w.player.frameHeight;
+    }
+    //init player texture
 }
 
 void draw(RenderWindow &window, world world)
 {
     window.color(255, 200, 200, 255);
     window.drawBackground();
-    window.drawTexture(world.player.texture, world.player.x, world.player.y, HEIGHT_MODIFIER);
+    if(world.player.left)
+    {
+        window.drawTextureRectFlip(world.player.moveTexture, world.player.x, world.player.y, HEIGHT_MODIFIER, world.player.playerRect);
+    }
+    else
+    {
+        window.drawTextureRect(world.player.moveTexture, world.player.x, world.player.y, HEIGHT_MODIFIER, world.player.playerRect);
+    }
 }
 
-void update(float timeStepSeconds, world &world, const Uint8 *state, RenderWindow &window)
+void update(float timeStepSeconds, world &world, const Uint8 *state)
 {
+    // update player position and direction
     if (state[SDL_SCANCODE_W])
     {
         world.player.y -= timeStepSeconds * 500;
-        world.player.texture = window.loadTexture("res/img/lea-stand-up.png");
+        world.player.playerRect.x = world.player.frameWidth * 1;
+        world.player.playerRect.y = world.player.frameHeight * 0;
+        world.player.left = false;
     }
     if (state[SDL_SCANCODE_S])
     {
         world.player.y += timeStepSeconds * 500;
-        world.player.texture = window.loadTexture("res/img/lea-stand-down.png");
+        world.player.playerRect.x = world.player.frameWidth * 1;
+        world.player.playerRect.y = world.player.frameHeight * 4;
+        world.player.left = false;
     }
     if (state[SDL_SCANCODE_A])
     {
         world.player.x -= timeStepSeconds * 500;
-        world.player.texture = window.loadTexture("res/img/lea-stand-side.png");
+        world.player.playerRect.x = world.player.frameWidth * 1;
+        world.player.playerRect.y = world.player.frameHeight * 2;
+        world.player.left = true;
     }
     if (state[SDL_SCANCODE_D])
     {
         world.player.x += timeStepSeconds * 500;
-        world.player.texture = window.loadTexture("res/img/lea-stand-side.png");
+        world.player.playerRect.x = world.player.frameWidth * 1;
+        world.player.playerRect.y = world.player.frameHeight * 2;
+        world.player.left = false;
     }
 }
 
@@ -129,7 +153,7 @@ int main(int argc, char **argv)
         // clear screen
         window.clear();
         // update world
-        update(timeStepS, w, state, window);
+        update(timeStepS, w, state);
         // draw
         draw(window, w);
         // render
