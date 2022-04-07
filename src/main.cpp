@@ -40,7 +40,8 @@ struct player
     SDL_Texture *moveTexture;
     int frameWidth, frameHeight;
     SDL_Rect playerRect;
-    bool left;
+    bool aim;
+    float aim_x, aim_y;
 };
 
 struct rect_wall
@@ -81,6 +82,9 @@ void init(world &w, RenderWindow window)
         w.player.playerRect.w = w.player.frameWidth;
         w.player.playerRect.h = w.player.frameHeight;
     }
+    w.player.aim = false;
+    w.player.aim_x = 0;
+    w.player.aim_y = 0;
 }
 
 // choose wich part of the texture to draw
@@ -127,6 +131,14 @@ void selectRect(world &w)
     }
 }
 
+// calculate the coordinates of the border of a circle with a given angle and a radius of 1000 and the center is player
+void calculateBorderOfCircle(world &w, int x, int y)
+{
+    float angle = atan2(y - w.player.y, x - w.player.x);
+    w.player.aim_x = w.player.x + 1000 * cos(angle);
+    w.player.aim_y = w.player.y + 1000 * sin(angle);
+}
+
 void draw(RenderWindow &window, world world)
 {
     window.color(255, 200, 200, 255);
@@ -139,6 +151,11 @@ void draw(RenderWindow &window, world world)
     else
     {
         window.drawTextureRectFlip(world.player.moveTexture, world.player.x, world.player.y, HEIGHT_MODIFIER, world.player.playerRect);
+    }
+    if(world.player.aim)
+    {
+        window.color(255, 0, 0, 255);
+        window.drawLine(world.player.x, world.player.y, world.player.aim_x, world.player.aim_y);
     }
 }
 
@@ -181,6 +198,16 @@ void update(float timeStepSeconds, world &world, const Uint8 *state)
     {
         world.player.direction = PLAYER_DIRECTION_DOWN_RIGHT;
     }
+    int x, y;
+    if (SDL_GetMouseState(&x, &y) == SDL_BUTTON_LEFT)
+    {
+        world.player.aim = true;
+        calculateBorderOfCircle(world, x, y);
+    }
+    else
+    {
+        world.player.aim = false;
+    }
 }
 
 int main(int argc, char **argv)
@@ -205,6 +232,7 @@ int main(int argc, char **argv)
         float startTicks = SDL_GetTicks();
         float timeStepS = 1.0f / window.getRefreshRate();
         float timeStepMs = 1000.0f / window.getRefreshRate();
+        SDL_PumpEvents();
 
         // get input
         while (SDL_PollEvent(&event))
