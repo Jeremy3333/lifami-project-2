@@ -47,27 +47,34 @@ Vector2f initVector2f(double x, double y) {
 
 //init galaxy with 3 planets
 void init(galaxy &g) {
-    g.numPlanets = 3;
+    g.numPlanets = 4;
     g.planets[0].position = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
     g.planets[0].velocity = initVector2f(0, 0);
-    g.planets[0].mass = 100000000000000000000000000000;
+    g.planets[0].mass = 1000000000000000;
     g.planets[0].radius = 5;
     g.planets[0].color = {255, 255, 255, 255};
     g.planets[0].moveable = false;
 
     g.planets[1].position = initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2);
-    g.planets[1].velocity = initVector2f(0, 0);
-    g.planets[1].mass = 100000000000000000000000000000;
+    g.planets[1].velocity = initVector2f(0, 20);
+    g.planets[1].mass = 100000000000;
     g.planets[1].radius = 5;
     g.planets[1].color = {255, 255, 100, 255};
     g.planets[1].moveable = true;
 
     g.planets[2].position = initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2);
-    g.planets[2].velocity = initVector2f(0, 0);
-    g.planets[2].mass = 100000000000000000000000000000;
+    g.planets[2].velocity = initVector2f(0, -20);
+    g.planets[2].mass = 100000000000;
     g.planets[2].radius = 5;
     g.planets[2].color = {255, 255, 100, 255};
     g.planets[2].moveable = true;
+
+    g.planets[3].position = initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2);
+    g.planets[3].velocity = initVector2f(0, -17);
+    g.planets[3].mass = 10000000;
+    g.planets[3].radius = 3;
+    g.planets[3].color = {255, 255, 100, 255};
+    g.planets[3].moveable = true;
 }
 
 void draw(galaxy g, RenderWindow &window) {
@@ -101,10 +108,10 @@ void update(float timeStepSeconds, galaxy &g) {
         for (int j = i + 1; j < g.numPlanets; j++)
         {
             Vector2f force = gForce(g.planets[i], g.planets[j]);
-            g.planets[i].velocity.x += (force.x / g.planets[i].mass) * timeStepSeconds;
-            g.planets[i].velocity.y += (force.y / g.planets[i].mass) * timeStepSeconds;
-            g.planets[j].velocity.x -= (force.x / g.planets[j].mass) * timeStepSeconds;
-            g.planets[j].velocity.y -= (force.y / g.planets[j].mass) * timeStepSeconds;
+            g.planets[i].velocity.x -= (force.x / g.planets[i].mass) * timeStepSeconds;
+            g.planets[i].velocity.y -= (force.y / g.planets[i].mass) * timeStepSeconds;
+            g.planets[j].velocity.x += (force.x / g.planets[j].mass) * timeStepSeconds;
+            g.planets[j].velocity.y += (force.y / g.planets[j].mass) * timeStepSeconds;
         }
     }
 
@@ -115,7 +122,6 @@ void update(float timeStepSeconds, galaxy &g) {
         {
             g.planets[i].position.x += g.planets[i].velocity.x * timeStepSeconds;
             g.planets[i].position.y += g.planets[i].velocity.y * timeStepSeconds;
-            std::cout << "velocity: " << g.planets[i].velocity.x << " " << g.planets[i].velocity.y << std::endl;
         }
     }
 }
