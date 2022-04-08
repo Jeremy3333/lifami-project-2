@@ -15,6 +15,8 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
+#define G 6.67408e-11
+
 /*
  * Debug:
  * g++ -c src/*.cpp -std=c++14 -g -Wall -m64 -I include -I C:/SDL2-w64/include  && g++ *.o -o bin/debug/main -L C:/SDL2-w64/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image && start bin/debug/main
@@ -50,28 +52,28 @@ void init(galaxy &g) {
     g.numPlanets = 4;
     g.planets[0].position = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
     g.planets[0].velocity = initVector2f(0, 0);
-    g.planets[0].mass = 1000000000000000;
-    g.planets[0].radius = 5;
+    g.planets[0].mass = 20000000000000;
+    g.planets[0].radius = 10;
     g.planets[0].color = {255, 255, 255, 255};
     g.planets[0].moveable = false;
 
     g.planets[1].position = initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2);
     g.planets[1].velocity = initVector2f(0, 20);
-    g.planets[1].mass = 100000000000;
+    g.planets[1].mass = 2000000000;
     g.planets[1].radius = 5;
     g.planets[1].color = {255, 255, 100, 255};
     g.planets[1].moveable = true;
 
     g.planets[2].position = initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2);
     g.planets[2].velocity = initVector2f(0, -20);
-    g.planets[2].mass = 100000000000;
+    g.planets[2].mass = 2000000000;
     g.planets[2].radius = 5;
     g.planets[2].color = {255, 255, 100, 255};
     g.planets[2].moveable = true;
 
     g.planets[3].position = initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2);
     g.planets[3].velocity = initVector2f(0, -17);
-    g.planets[3].mass = 10000000;
+    g.planets[3].mass = 200000;
     g.planets[3].radius = 3;
     g.planets[3].color = {255, 255, 100, 255};
     g.planets[3].moveable = true;
@@ -88,32 +90,45 @@ void draw(galaxy g, RenderWindow &window) {
     }
 }
 
+//calculate the distance between two Vector2f
+double distance(Vector2f v1, Vector2f v2) {
+    return sqrt(pow(v1.x - v2.x, 2) + pow(v1.y - v2.y, 2));
+}
+
 //calculate the force between two planets
 Vector2f gForce(planet p1, planet p2) {
-    Vector2f g_force;
-    double G = 6.67408e-11;
-    double distance = sqrt(pow(p1.position.x - p2.position.x, 2) + pow(p1.position.y - p2.position.y, 2));
-    double forceMagnitude = G * p1.mass * p2.mass / pow(distance, 2);
-    g_force.x = forceMagnitude * (p1.position.x - p2.position.x) / distance;
-    g_force.y = forceMagnitude * (p1.position.y - p2.position.y) / distance;
-    return g_force;
+    Vector2f force;
+    double dist = distance(p1.position, p2.position);
+    double forceMagnitude = (G * p1.mass * p2.mass) / pow(dist, 2);
+    force.x = forceMagnitude * (p2.position.x - p1.position.x) / dist;
+    force.y = forceMagnitude * (p2.position.y - p1.position.y) / dist;
+    return force;
+}
+
+// calculate the force between all planets with gForce function
+void calculateForces(galaxy &g) {
+    for (int i = 0; i < g.numPlanets; i++) {
+        for (int j = 0; j < g.numPlanets; j++) {
+            if (i != j) {
+                g.planets[i].velocity = g.planets[i].velocity + gForce(g.planets[i], g.planets[j]) / g.planets[i].mass;
+            }
+        }
+    }
+}
+
+// verifie if the left click is on a planet
+bool isOnPlanet(galaxy g, Vector2f mousePos) {
+    for (int i = 0; i < g.numPlanets; i++) {
+        if (distance(g.planets[i].position, mousePos) < g.planets[i].radius) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void update(float timeStepSeconds, galaxy &g) {
     timeStepSeconds *= TIMESTEPS_MULTIPLIER;
-
-    //calculate the force between all planets with gForce function
-    for (int i = 0; i < g.numPlanets; i++)
-    {
-        for (int j = i + 1; j < g.numPlanets; j++)
-        {
-            Vector2f force = gForce(g.planets[i], g.planets[j]);
-            g.planets[i].velocity.x -= (force.x / g.planets[i].mass) * timeStepSeconds;
-            g.planets[i].velocity.y -= (force.y / g.planets[i].mass) * timeStepSeconds;
-            g.planets[j].velocity.x += (force.x / g.planets[j].mass) * timeStepSeconds;
-            g.planets[j].velocity.y += (force.y / g.planets[j].mass) * timeStepSeconds;
-        }
-    }
+    calculateForces(g);
 
     //update all the planets of a galaxy
     for (int i = 0; i < g.numPlanets; i++)
@@ -122,6 +137,23 @@ void update(float timeStepSeconds, galaxy &g) {
         {
             g.planets[i].position.x += g.planets[i].velocity.x * timeStepSeconds;
             g.planets[i].position.y += g.planets[i].velocity.y * timeStepSeconds;
+        }
+    }
+
+    //if the left click is on a planet, change the position of the planet
+    int x, y;
+    if (SDL_GetMouseState(&x, &y) & SDL_BUTTON(SDL_BUTTON_LEFT))
+    {
+        Vector2f mousePos = initVector2f(x, y);
+        if (isOnPlanet(g, mousePos))
+        {
+            for (int i = 0; i < g.numPlanets; i++)
+            {
+                if (distance(g.planets[i].position, mousePos) < g.planets[i].radius)
+                {
+                    g.planets[i].position = mousePos;
+                }
+            }
         }
     }
 }
