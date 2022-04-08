@@ -8,21 +8,12 @@
 #include "RenderWindow.hpp"
 #include "math.hpp"
 
+#define MAX_PLANETS 10
+#define TIMESTEPS_MULTIPLIER 1
+
 #define WINDOW_TITLE "LIFAMI"
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
-#define MAX_RECT_WALL 20
-#define MAX_ANGLE_WALL 20
-#define HEIGHT_MODIFIER 2
-
-#define PLAYER_DIRECTION_UP 0
-#define PLAYER_DIRECTION_DOWN 1
-#define PLAYER_DIRECTION_LEFT 2
-#define PLAYER_DIRECTION_RIGHT 3
-#define PLAYER_DIRECTION_UP_LEFT 4
-#define PLAYER_DIRECTION_UP_RIGHT 5
-#define PLAYER_DIRECTION_DOWN_LEFT 6
-#define PLAYER_DIRECTION_DOWN_RIGHT 7
 
 /*
  * Debug:
@@ -32,181 +23,100 @@
  * g++ -c src/*.cpp -std=c++14 -O3 -Wall -m64 -I include -I C:/SDL2-w64/include  && g++ *.o -o bin/release/main -s -L C:/SDL2-w64/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image && start bin/release/main
  */
 
-struct player
-{
-    float x, y;
-    float animation_timer;
-    int direction;
-    SDL_Texture *moveTexture;
-    int frameWidth, frameHeight;
-    SDL_Rect playerRect;
-    bool aim;
-    float aim_x, aim_y;
+struct planet {
+    Vector2f position;
+    Vector2f velocity;
+    double mass;
+    double radius;
+    SDL_Color color;
+    bool moveable;
 };
 
-struct rect_wall
-{
-    float x, y;
-    float width, height;
+struct galaxy {
+    planet planets[MAX_PLANETS];
+    int numPlanets;
 };
 
-struct angle_wall
-{
-    float x, y;
-    float width;
-    int direction;
-};
-
-struct world
-{
-    player player;
-    rect_wall rect_walls[MAX_RECT_WALL];
-    angle_wall angle_walls[MAX_ANGLE_WALL];
-};
-
-void init(world &w, RenderWindow window)
-{
-    w.player.x = WINDOW_WIDTH / 2;
-    w.player.y = WINDOW_HEIGHT / 2;
-    w.player.animation_timer = 0;
-    w.player.direction = PLAYER_DIRECTION_DOWN;
-    {
-        int textureWidth = 0;
-        int textureHeight = 0;
-        w.player.moveTexture = window.loadTexture("assets/media/move.png");
-        SDL_QueryTexture(w.player.moveTexture, NULL, NULL, &textureWidth, &textureHeight);
-        w.player.frameWidth = textureWidth / 16;
-        w.player.frameHeight = textureHeight / 19;
-        w.player.playerRect.x = w.player.frameWidth;
-        w.player.playerRect.y = w.player.frameHeight * 4;
-        w.player.playerRect.w = w.player.frameWidth;
-        w.player.playerRect.h = w.player.frameHeight;
-    }
-    w.player.aim = false;
-    w.player.aim_x = 0;
-    w.player.aim_y = 0;
+//init a Vector2f
+Vector2f initVector2f(double x, double y) {
+    Vector2f v;
+    v.x = x;
+    v.y = y;
+    return v;
 }
 
-// choose wich part of the texture to draw
-void selectRect(world &w)
-{
-    switch (w.player.direction)
+//init galaxy with 3 planets
+void init(galaxy &g) {
+    g.numPlanets = 3;
+    g.planets[0].position = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+    g.planets[0].velocity = initVector2f(0, 0);
+    g.planets[0].mass = 100000000000000000000000000000;
+    g.planets[0].radius = 5;
+    g.planets[0].color = {255, 255, 255, 255};
+    g.planets[0].moveable = false;
+
+    g.planets[1].position = initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2);
+    g.planets[1].velocity = initVector2f(0, 0);
+    g.planets[1].mass = 100000000000000000000000000000;
+    g.planets[1].radius = 5;
+    g.planets[1].color = {255, 255, 100, 255};
+    g.planets[1].moveable = true;
+
+    g.planets[2].position = initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2);
+    g.planets[2].velocity = initVector2f(0, 0);
+    g.planets[2].mass = 100000000000000000000000000000;
+    g.planets[2].radius = 5;
+    g.planets[2].color = {255, 255, 100, 255};
+    g.planets[2].moveable = true;
+}
+
+void draw(galaxy g, RenderWindow &window) {
+    window.color(0, 0, 0, 255);
+    window.drawBackground();
+
+    //draw all the planets of a galaxy with window.fillCircle
+    for (int i = 0; i < g.numPlanets; i++) {
+        window.color(g.planets[i].color.r, g.planets[i].color.g, g.planets[i].color.b, g.planets[i].color.a);
+        window.fillCircle(g.planets[i].position.x, g.planets[i].position.y, g.planets[i].radius);
+    }
+}
+
+//calculate the force between two planets
+Vector2f gForce(planet p1, planet p2) {
+    Vector2f g_force;
+    double G = 6.67408e-11;
+    double distance = sqrt(pow(p1.position.x - p2.position.x, 2) + pow(p1.position.y - p2.position.y, 2));
+    double forceMagnitude = G * p1.mass * p2.mass / pow(distance, 2);
+    g_force.x = forceMagnitude * (p1.position.x - p2.position.x) / distance;
+    g_force.y = forceMagnitude * (p1.position.y - p2.position.y) / distance;
+    return g_force;
+}
+
+void update(float timeStepSeconds, galaxy &g) {
+    timeStepSeconds *= TIMESTEPS_MULTIPLIER;
+
+    //calculate the force between all planets with gForce function
+    for (int i = 0; i < g.numPlanets; i++)
     {
+        for (int j = i + 1; j < g.numPlanets; j++)
         {
-        case PLAYER_DIRECTION_UP:
-            w.player.playerRect.x = w.player.frameWidth;
-            w.player.playerRect.y = w.player.frameHeight * 0;
-            break;
-        case PLAYER_DIRECTION_DOWN:
-            w.player.playerRect.x = w.player.frameWidth;
-            w.player.playerRect.y = w.player.frameHeight * 4;
-            break;
-        case PLAYER_DIRECTION_LEFT:
-            w.player.playerRect.x = w.player.frameWidth ;
-            w.player.playerRect.y = w.player.frameHeight * 2;
-            break;
-        case PLAYER_DIRECTION_RIGHT:
-            w.player.playerRect.x = w.player.frameWidth;
-            w.player.playerRect.y = w.player.frameHeight * 2;
-            break;
-        case PLAYER_DIRECTION_UP_LEFT:
-            w.player.playerRect.x = w.player.frameWidth;
-            w.player.playerRect.y = w.player.frameHeight * 1;
-            break;
-        case PLAYER_DIRECTION_UP_RIGHT:
-            w.player.playerRect.x = w.player.frameWidth;
-            w.player.playerRect.y = w.player.frameHeight * 1;
-            break;
-        case PLAYER_DIRECTION_DOWN_LEFT:
-            w.player.playerRect.x = w.player.frameWidth;
-            w.player.playerRect.y = w.player.frameHeight * 3;
-            break;
-        case PLAYER_DIRECTION_DOWN_RIGHT:
-            w.player.playerRect.x = w.player.frameWidth;
-            w.player.playerRect.y = w.player.frameHeight * 3;
-            break;
-        default:
-            break;
+            Vector2f force = gForce(g.planets[i], g.planets[j]);
+            g.planets[i].velocity.x += (force.x / g.planets[i].mass) * timeStepSeconds;
+            g.planets[i].velocity.y += (force.y / g.planets[i].mass) * timeStepSeconds;
+            g.planets[j].velocity.x -= (force.x / g.planets[j].mass) * timeStepSeconds;
+            g.planets[j].velocity.y -= (force.y / g.planets[j].mass) * timeStepSeconds;
         }
     }
-}
 
-// calculate the coordinates of the border of a circle with a given angle and a radius of 1000 and the center is player
-void calculateBorderOfCircle(world &w, int x, int y)
-{
-    float angle = atan2(y - w.player.y, x - w.player.x);
-    w.player.aim_x = w.player.x + 1000 * cos(angle);
-    w.player.aim_y = w.player.y + 1000 * sin(angle);
-}
-
-void draw(RenderWindow &window, world world)
-{
-    window.color(255, 200, 200, 255);
-    window.drawBackground();
-    selectRect(world);
-    if(world.player.direction == PLAYER_DIRECTION_UP || world.player.direction == PLAYER_DIRECTION_DOWN || world.player.direction == PLAYER_DIRECTION_RIGHT || world.player.direction == PLAYER_DIRECTION_DOWN_RIGHT || world.player.direction == PLAYER_DIRECTION_UP_RIGHT)
+    //update all the planets of a galaxy
+    for (int i = 0; i < g.numPlanets; i++)
     {
-        window.drawTextureRect(world.player.moveTexture, world.player.x, world.player.y, HEIGHT_MODIFIER, world.player.playerRect);
-    }
-    else
-    {
-        window.drawTextureRectFlip(world.player.moveTexture, world.player.x, world.player.y, HEIGHT_MODIFIER, world.player.playerRect);
-    }
-    if(world.player.aim)
-    {
-        window.color(255, 0, 0, 255);
-        window.drawLine(world.player.x, world.player.y, world.player.aim_x, world.player.aim_y);
-    }
-}
-
-void update(float timeStepSeconds, world &world, const Uint8 *state)
-{
-    // update player position and direction
-    if (state[SDL_SCANCODE_W])
-    {
-        world.player.y -= timeStepSeconds * 500;
-        world.player.direction = PLAYER_DIRECTION_UP;
-    }
-    if (state[SDL_SCANCODE_S])
-    {
-        world.player.y += timeStepSeconds * 500;
-        world.player.direction = PLAYER_DIRECTION_DOWN;
-    }
-    if (state[SDL_SCANCODE_A])
-    {
-        world.player.x -= timeStepSeconds * 500;
-        world.player.direction = PLAYER_DIRECTION_LEFT;
-    }
-    if (state[SDL_SCANCODE_D])
-    {
-        world.player.x += timeStepSeconds * 500;
-        world.player.direction = PLAYER_DIRECTION_RIGHT;
-    }
-    if (state[SDL_SCANCODE_W] && state[SDL_SCANCODE_A])
-    {
-        world.player.direction = PLAYER_DIRECTION_UP_LEFT;
-    }
-    if (state[SDL_SCANCODE_W] && state[SDL_SCANCODE_D])
-    {
-        world.player.direction = PLAYER_DIRECTION_UP_RIGHT;
-    }
-    if (state[SDL_SCANCODE_S] && state[SDL_SCANCODE_A])
-    {
-        world.player.direction = PLAYER_DIRECTION_DOWN_LEFT;
-    }
-    if (state[SDL_SCANCODE_S] && state[SDL_SCANCODE_D])
-    {
-        world.player.direction = PLAYER_DIRECTION_DOWN_RIGHT;
-    }
-    int x, y;
-    if (SDL_GetMouseState(&x, &y) == SDL_BUTTON_LEFT)
-    {
-        world.player.aim = true;
-        calculateBorderOfCircle(world, x, y);
-    }
-    else
-    {
-        world.player.aim = false;
+        if (g.planets[i].moveable)
+        {
+            g.planets[i].position.x += g.planets[i].velocity.x * timeStepSeconds;
+            g.planets[i].position.y += g.planets[i].velocity.y * timeStepSeconds;
+            std::cout << "velocity: " << g.planets[i].velocity.x << " " << g.planets[i].velocity.y << std::endl;
+        }
     }
 }
 
@@ -219,10 +129,10 @@ int main(int argc, char **argv)
     SDL_Event event;
     const Uint8 *state = SDL_GetKeyboardState(NULL);
     bool quit = false;
-    world w;
+    galaxy g;
 
     // initialize world
-    init(w, window);
+    init(g);
 
     // load media
 
@@ -244,10 +154,9 @@ int main(int argc, char **argv)
         // clear screen
         window.clear();
         // update world
-        update(timeStepS, w, state);
+        update(timeStepS, g);
         // draw
-        draw(window, w);
-        // render
+        draw(g, window);
 
         window.display();
 

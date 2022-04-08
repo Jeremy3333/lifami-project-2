@@ -104,7 +104,7 @@ void RenderWindow::color(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
     SDL_SetRenderDrawColor(renderer, r, g, b, a);
 }
 
-void RenderWindow::FillCircle(float x, float y, float radius)
+void RenderWindow::fillCircle(float x, float y, float radius)
 {
     for (int w = 0; w < radius * 2; w++)
     {
