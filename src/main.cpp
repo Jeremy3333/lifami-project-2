@@ -10,6 +10,7 @@
 
 #define MAX_PLANETS 10
 #define TIMESTEPS_MULTIPLIER 1
+#define MAX_TRACE_LENGTH 1000
 
 #define WINDOW_TITLE "LIFAMI"
 #define WINDOW_WIDTH 800
@@ -33,6 +34,8 @@ struct planet {
     double radius;
     SDL_Color color;
     bool moveable;
+    Vector2f Traces[MAX_TRACE_LENGTH];
+    int TraceIndex;
 };
 
 struct button {
@@ -44,7 +47,7 @@ struct button {
 
 struct galaxy {
     planet planets[MAX_PLANETS];
-    int numPlanets;
+    int nbPlanets;
     button nextPage;
 };
 
@@ -56,36 +59,31 @@ Vector2f initVector2f(double x, double y) {
     return v;
 }
 
-//init galaxy with 3 planets
+//init a planet
+planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radius, SDL_Color color, bool moveable)
+{
+    planet p;
+    p.position = position;
+    p.velocity = velocity;
+    p.mass = mass;
+    p.radius = radius;
+    p.color = color;
+    p.moveable = moveable;
+    p.TraceIndex = 0;
+    for(int i = 0; i < 100; i++)
+    {
+        p.Traces[i] = position;
+    }
+    return p;
+}
+
+//init galaxy with 4 planets
 void init(galaxy &g) {
-    g.numPlanets = 4;
-    g.planets[0].position = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
-    g.planets[0].velocity = initVector2f(0, 0);
-    g.planets[0].mass = 20000000000000;
-    g.planets[0].radius = 10;
-    g.planets[0].color = {255, 255, 255, 255};
-    g.planets[0].moveable = false;
-
-    g.planets[1].position = initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2);
-    g.planets[1].velocity = initVector2f(0, 20);
-    g.planets[1].mass = 2000000000;
-    g.planets[1].radius = 5;
-    g.planets[1].color = {255, 255, 100, 255};
-    g.planets[1].moveable = true;
-
-    g.planets[2].position = initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2);
-    g.planets[2].velocity = initVector2f(0, -20);
-    g.planets[2].mass = 2000000000;
-    g.planets[2].radius = 5;
-    g.planets[2].color = {255, 255, 100, 255};
-    g.planets[2].moveable = true;
-
-    g.planets[3].position = initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2);
-    g.planets[3].velocity = initVector2f(0, -17);
-    g.planets[3].mass = 200000;
-    g.planets[3].radius = 3;
-    g.planets[3].color = {255, 255, 100, 255};
-    g.planets[3].moveable = true;
+    g.nbPlanets = 4;
+    g.planets[0] = initPlanet(initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), initVector2f(0, 0), 20000000000000, 10, {255, 255, 255, 255}, false);
+    g.planets[1] = initPlanet(initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2), initVector2f(0, 20), 2000000000, 5, {255, 255, 100, 255}, true);
+    g.planets[2] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2), initVector2f(0, -20), 2000000000, 5, {255, 255, 100, 255}, true);
+    g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -17), 200000, 3,{255, 255, 100, 255}, true);
 
     //init button
     g.nextPage.position = initVector2f(20, WINDOW_HEIGHT - 50);
@@ -99,9 +97,14 @@ void draw(galaxy g, RenderWindow &window) {
     window.drawBackground();
 
     //draw all the planets of a galaxy with window.fillCircle
-    for (int i = 0; i < g.numPlanets; i++) {
+    for (int i = 0; i < g.nbPlanets; i++) {
         window.color(g.planets[i].color.r, g.planets[i].color.g, g.planets[i].color.b, g.planets[i].color.a);
         window.fillCircle(g.planets[i].position.x, g.planets[i].position.y, g.planets[i].radius);
+        // draw the trace
+        for(int j = 0; j < MAX_TRACE_LENGTH; j++)
+        {
+            window.fillCircle(g.planets[i].Traces[j].x, g.planets[i].Traces[j].y, 1);
+        }
     }
 
     //draw the button
@@ -127,8 +130,8 @@ Vector2f gForce(planet p1, planet p2) {
 
 // calculate the force between all planets with gForce function
 void calculateForces(galaxy &g) {
-    for (int i = 0; i < g.numPlanets; i++) {
-        for (int j = 0; j < g.numPlanets; j++) {
+    for (int i = 0; i < g.nbPlanets; i++) {
+        for (int j = 0; j < g.nbPlanets; j++) {
             if (i != j) {
                 g.planets[i].velocity = g.planets[i].velocity + gForce(g.planets[i], g.planets[j]) / g.planets[i].mass;
             }
@@ -138,7 +141,7 @@ void calculateForces(galaxy &g) {
 
 // verifie if the left click is on a planet
 bool isOnPlanet(galaxy g, Vector2f mousePos) {
-    for (int i = 0; i < g.numPlanets; i++) {
+    for (int i = 0; i < g.nbPlanets; i++) {
         if (distance(g.planets[i].position, mousePos) < g.planets[i].radius) {
             return true;
         }
@@ -159,12 +162,18 @@ void updateIndex0(float timeStepSeconds, galaxy &g)
     calculateForces(g);
 
     // update all the planets of a galaxy
-    for (int i = 0; i < g.numPlanets; i++)
+    for (int i = 0; i < g.nbPlanets; i++)
     {
         if (g.planets[i].moveable)
         {
             g.planets[i].position.x += g.planets[i].velocity.x * timeStepSeconds;
             g.planets[i].position.y += g.planets[i].velocity.y * timeStepSeconds;
+            g.planets[i].Traces[g.planets[i].TraceIndex] = g.planets[i].position;
+            g.planets[i].TraceIndex++;
+            if (g.planets[i].TraceIndex >= MAX_TRACE_LENGTH)
+            {
+                g.planets[i].TraceIndex = 0;
+            }
         }
     }
 
@@ -175,7 +184,7 @@ void updateIndex0(float timeStepSeconds, galaxy &g)
         // if the left click is on a planet, change the position of the planet
         if (isOnPlanet(g, mousePos))
         {
-            for (int i = 0; i < g.numPlanets; i++)
+            for (int i = 0; i < g.nbPlanets; i++)
             {
                 if (distance(g.planets[i].position, mousePos) < g.planets[i].radius)
                 {
