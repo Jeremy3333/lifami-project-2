@@ -120,6 +120,12 @@ void RenderWindow::fillCircle(float x, float y, float radius)
     }
 }
 
+void RenderWindow::fillRect(int x, int y, int w, int h)
+{
+    SDL_Rect rect = {x, y, w, h};
+    SDL_RenderFillRect(renderer, &rect);
+}
+
 void RenderWindow::drawLine(float x1, float y1, float x2, float y2)
 {
     SDL_RenderDrawLine(renderer, x1, y1, x2, y2);

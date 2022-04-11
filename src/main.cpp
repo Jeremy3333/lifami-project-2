@@ -14,6 +14,7 @@
 #define WINDOW_TITLE "LIFAMI"
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+#define NUM_PAGES 2
 
 #define G 6.67408e-11
 
@@ -34,9 +35,17 @@ struct planet {
     bool moveable;
 };
 
+struct button {
+    Vector2f position;
+    Vector2f size;
+    SDL_Color color;
+    bool pressed;
+};
+
 struct galaxy {
     planet planets[MAX_PLANETS];
     int numPlanets;
+    button nextPage;
 };
 
 //init a Vector2f
@@ -77,6 +86,12 @@ void init(galaxy &g) {
     g.planets[3].radius = 3;
     g.planets[3].color = {255, 255, 100, 255};
     g.planets[3].moveable = true;
+
+    //init button
+    g.nextPage.position = initVector2f(20, WINDOW_HEIGHT - 50);
+    g.nextPage.size = initVector2f(60, 30);
+    g.nextPage.color = {255, 0, 0, 255};
+    g.nextPage.pressed = false;
 }
 
 void draw(galaxy g, RenderWindow &window) {
@@ -88,6 +103,10 @@ void draw(galaxy g, RenderWindow &window) {
         window.color(g.planets[i].color.r, g.planets[i].color.g, g.planets[i].color.b, g.planets[i].color.a);
         window.fillCircle(g.planets[i].position.x, g.planets[i].position.y, g.planets[i].radius);
     }
+
+    //draw the button
+    window.color(g.nextPage.color.r, g.nextPage.color.g, g.nextPage.color.b, g.nextPage.color.a);
+    window.fillRect(g.nextPage.position.x, g.nextPage.position.y, g.nextPage.size.x, g.nextPage.size.y);
 }
 
 //calculate the distance between two Vector2f
@@ -104,6 +123,7 @@ Vector2f gForce(planet p1, planet p2) {
     force.y = forceMagnitude * (p2.position.y - p1.position.y) / dist;
     return force;
 }
+
 
 // calculate the force between all planets with gForce function
 void calculateForces(galaxy &g) {
@@ -126,11 +146,19 @@ bool isOnPlanet(galaxy g, Vector2f mousePos) {
     return false;
 }
 
-void update(float timeStepSeconds, galaxy &g) {
-    timeStepSeconds *= TIMESTEPS_MULTIPLIER;
+//verifies if the mouse click the rect button
+bool isOnButton(galaxy g, Vector2f mousePos) {
+    if (distance(g.nextPage.position, mousePos) < g.nextPage.size.x / 2) {
+        return true;
+    }
+    return false;
+}
+
+void updateIndex0(float timeStepSeconds, galaxy &g)
+{
     calculateForces(g);
 
-    //update all the planets of a galaxy
+    // update all the planets of a galaxy
     for (int i = 0; i < g.numPlanets; i++)
     {
         if (g.planets[i].moveable)
@@ -140,11 +168,11 @@ void update(float timeStepSeconds, galaxy &g) {
         }
     }
 
-    //if the left click is on a planet, change the position of the planet
     int x, y;
     if (SDL_GetMouseState(&x, &y) & SDL_BUTTON(SDL_BUTTON_LEFT))
     {
         Vector2f mousePos = initVector2f(x, y);
+        // if the left click is on a planet, change the position of the planet
         if (isOnPlanet(g, mousePos))
         {
             for (int i = 0; i < g.numPlanets; i++)
@@ -158,6 +186,34 @@ void update(float timeStepSeconds, galaxy &g) {
     }
 }
 
+void update(float timeStepSeconds, galaxy &g, int &index)
+{
+    timeStepSeconds *= TIMESTEPS_MULTIPLIER;
+
+    if(index == 0)
+    {
+        updateIndex0(timeStepSeconds, g);
+    }
+
+    int x, y;
+    if (SDL_GetMouseState(&x, &y) == SDL_BUTTON_LEFT)
+    {
+        std::cout << "index = " << index << std::endl;
+        Vector2f mousePos = initVector2f(x, y);
+        //if the left click is on the button, change the page
+        if (isOnButton(g, mousePos) && g.nextPage.pressed == false)
+        {
+            g.nextPage.pressed = true;
+            index++;
+        }
+    }
+    //if the index is supperieur to the number of pages - 1, change the index to 0
+    if (index > NUM_PAGES - 1)
+    {
+        index = 0;
+    }
+}
+
 int main(int argc, char **argv)
 {
     // initialize SDL
@@ -168,6 +224,7 @@ int main(int argc, char **argv)
     const Uint8 *state = SDL_GetKeyboardState(NULL);
     bool quit = false;
     galaxy g;
+    int index = 0;
 
     // initialize world
     init(g);
@@ -191,8 +248,10 @@ int main(int argc, char **argv)
 
         // clear screen
         window.clear();
-        // update world
-        update(timeStepS, g);
+
+        // update game
+        update(timeStepS, g, index);
+
         // draw
         draw(g, window);
 
