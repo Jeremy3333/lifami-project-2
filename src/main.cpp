@@ -10,7 +10,7 @@
 
 #define MAX_PLANETS 10
 #define TIMESTEPS_MULTIPLIER 1
-#define MAX_TRACE_LENGTH 1000
+#define MAX_TRACE_LENGTH 2000
 
 #define WINDOW_TITLE "LIFAMI"
 #define WINDOW_WIDTH 800
@@ -36,6 +36,7 @@ struct planet {
     bool moveable;
     Vector2f Traces[MAX_TRACE_LENGTH];
     int TraceIndex;
+    SDL_Color TraceColor;
 };
 
 struct button {
@@ -60,7 +61,7 @@ Vector2f initVector2f(double x, double y) {
 }
 
 //init a planet
-planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radius, SDL_Color color, bool moveable)
+planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radius, SDL_Color color, bool moveable, SDL_Color TraceColor)
 {
     planet p;
     p.position = position;
@@ -74,16 +75,17 @@ planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radi
     {
         p.Traces[i] = position;
     }
+    p.TraceColor = TraceColor;
     return p;
 }
 
 //init galaxy with 4 planets
 void init(galaxy &g) {
     g.nbPlanets = 4;
-    g.planets[0] = initPlanet(initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), initVector2f(0, 0), 20000000000000, 10, {255, 255, 255, 255}, false);
-    g.planets[1] = initPlanet(initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2), initVector2f(0, 20), 2000000000, 5, {255, 255, 100, 255}, true);
-    g.planets[2] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2), initVector2f(0, -20), 2000000000, 5, {255, 255, 100, 255}, true);
-    g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -17), 200000, 3,{255, 255, 100, 255}, true);
+    g.planets[0] = initPlanet(initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), initVector2f(0, 0), 20000000000000, 10, {255, 255, 100, 255}, true, {255, 0, 0, 255});
+    g.planets[1] = initPlanet(initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2), initVector2f(0, 20), 2000000000000, 7, {255, 255, 100, 255}, true, {255, 0, 0, 255});
+    g.planets[2] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2), initVector2f(0, -20), 2000000000, 5, {255, 255, 100, 255}, true, {255, 0, 0, 255});
+    g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -17), 200000, 3,{255, 255, 100, 255}, true , {255, 0, 0, 255});
 
     //init button
     g.nextPage.position = initVector2f(20, WINDOW_HEIGHT - 50);
@@ -101,9 +103,13 @@ void draw(galaxy g, RenderWindow &window) {
         window.color(g.planets[i].color.r, g.planets[i].color.g, g.planets[i].color.b, g.planets[i].color.a);
         window.fillCircle(g.planets[i].position.x, g.planets[i].position.y, g.planets[i].radius);
         // draw the trace
-        for(int j = 0; j < MAX_TRACE_LENGTH; j++)
+        window.color(g.planets[i].TraceColor.r, g.planets[i].TraceColor.g, g.planets[i].TraceColor.b, g.planets[i].TraceColor.a);
+        if(g.planets[i].moveable)
         {
-            window.fillCircle(g.planets[i].Traces[j].x, g.planets[i].Traces[j].y, 1);
+            for(int j = 0; j < MAX_TRACE_LENGTH; j++)
+            {
+                window.fillCircle(g.planets[i].Traces[j].x, g.planets[i].Traces[j].y, 1);
+            }
         }
     }
 
