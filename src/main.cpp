@@ -100,8 +100,6 @@ void draw(galaxy g, RenderWindow &window) {
 
     //draw all the planets of a galaxy with window.fillCircle
     for (int i = 0; i < g.nbPlanets; i++) {
-        window.color(g.planets[i].color.r, g.planets[i].color.g, g.planets[i].color.b, g.planets[i].color.a);
-        window.fillCircle(g.planets[i].position.x, g.planets[i].position.y, g.planets[i].radius);
         // draw the trace
         window.color(g.planets[i].TraceColor.r, g.planets[i].TraceColor.g, g.planets[i].TraceColor.b, g.planets[i].TraceColor.a);
         if(g.planets[i].moveable)
@@ -111,6 +109,9 @@ void draw(galaxy g, RenderWindow &window) {
                 window.fillCircle(g.planets[i].Traces[j].x, g.planets[i].Traces[j].y, 1);
             }
         }
+        // draw the planet
+        window.color(g.planets[i].color.r, g.planets[i].color.g, g.planets[i].color.b, g.planets[i].color.a);
+        window.fillCircle(g.planets[i].position.x, g.planets[i].position.y, g.planets[i].radius);
     }
 
     //draw the button
@@ -157,7 +158,7 @@ bool isOnPlanet(galaxy g, Vector2f mousePos) {
 
 //verifies if the mouse click the rect button
 bool isOnButton(galaxy g, Vector2f mousePos) {
-    if (distance(g.nextPage.position, mousePos) < g.nextPage.size.x / 2) {
+    if (mousePos.x > g.nextPage.position.x && mousePos.x < g.nextPage.position.x + g.nextPage.size.x && mousePos.y > g.nextPage.position.y && mousePos.y < g.nextPage.position.y + g.nextPage.size.y) {
         return true;
     }
     return false;
@@ -213,7 +214,6 @@ void update(float timeStepSeconds, galaxy &g, int &index)
     int x, y;
     if (SDL_GetMouseState(&x, &y) == SDL_BUTTON_LEFT)
     {
-        std::cout << "index = " << index << std::endl;
         Vector2f mousePos = initVector2f(x, y);
         //if the left click is on the button, change the page
         if (isOnButton(g, mousePos) && g.nextPage.pressed == false)
@@ -221,6 +221,10 @@ void update(float timeStepSeconds, galaxy &g, int &index)
             g.nextPage.pressed = true;
             index++;
         }
+    }
+    else
+    {
+        g.nextPage.pressed = false;
     }
     //if the index is supperieur to the number of pages - 1, change the index to 0
     if (index > NUM_PAGES - 1)
