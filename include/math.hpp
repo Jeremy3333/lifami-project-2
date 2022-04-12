@@ -10,34 +10,34 @@ struct Vector2f
     }
 };
 
-Vector2f initVector(float x, float y)
-{
-    Vector2f vec;
-    vec.x = x;
-    vec.y = y;
-    return vec;
+//init a Vector2f
+Vector2f initVector2f(double x, double y) {
+    Vector2f v;
+    v.x = x;
+    v.y = y;
+    return v;
 }
 
 Vector2f operator-(const Vector2f &lhs, const Vector2f &rhs)
 {
-    return initVector(lhs.x - rhs.x, lhs.y - rhs.y);
+    return initVector2f(lhs.x - rhs.x, lhs.y - rhs.y);
 }
 
 Vector2f operator+(const Vector2f &lhs, const Vector2f &rhs)
 {
-    return initVector(lhs.x + rhs.x, lhs.y + rhs.y);
+    return initVector2f(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 
 Vector2f operator/(const Vector2f &lhs, float rhs)
 {
-    return initVector(lhs.x / rhs, lhs.y / rhs);
+    return initVector2f(lhs.x / rhs, lhs.y / rhs);
 }
 
 Vector2f operator*(const Vector2f &lhs, float rhs)
 {
-    return initVector(lhs.x * rhs, lhs.y * rhs);
+    return initVector2f(lhs.x * rhs, lhs.y * rhs);
 }
 Vector2f operator*(float rhs, const Vector2f &lhs)
 {
-    return initVector(lhs.x * rhs, lhs.y * rhs);
+    return initVector2f(lhs.x * rhs, lhs.y * rhs);
 }

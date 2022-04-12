@@ -52,14 +52,6 @@ struct galaxy {
     button nextPage;
 };
 
-//init a Vector2f
-Vector2f initVector2f(double x, double y) {
-    Vector2f v;
-    v.x = x;
-    v.y = y;
-    return v;
-}
-
 //init a planet
 planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radius, SDL_Color color, bool moveable, SDL_Color TraceColor)
 {
@@ -83,9 +75,9 @@ planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radi
 void init(galaxy &g) {
     g.nbPlanets = 4;
     g.planets[0] = initPlanet(initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), initVector2f(0, 0), 20000000000000, 10, {255, 255, 100, 255}, true, {255, 0, 0, 255});
-    g.planets[1] = initPlanet(initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2), initVector2f(0, 20), 2000000000000, 7, {255, 255, 100, 255}, true, {255, 0, 0, 255});
-    g.planets[2] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2), initVector2f(0, -20), 2000000000, 5, {255, 255, 100, 255}, true, {255, 0, 0, 255});
-    g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -17), 200000, 3,{255, 255, 100, 255}, true , {255, 0, 0, 255});
+    g.planets[1] = initPlanet(initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2), initVector2f(0, 20), 20000000000, 5, {255, 255, 100, 255}, true, {255, 0, 0, 255});
+    g.planets[2] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2), initVector2f(0, -20), 200000000000, 7, {255, 255, 100, 255}, true, {255, 0, 0, 255});
+    g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -11), 200000, 3,{255, 255, 100, 255}, true , {255, 0, 0, 255});
 
     //init button
     g.nextPage.position = initVector2f(20, WINDOW_HEIGHT - 50);
@@ -156,12 +148,9 @@ bool isOnPlanet(galaxy g, Vector2f mousePos) {
     return false;
 }
 
-//verifies if the mouse click the rect button
+//verifies if the mouse click the button
 bool isOnButton(galaxy g, Vector2f mousePos) {
-    if (mousePos.x > g.nextPage.position.x && mousePos.x < g.nextPage.position.x + g.nextPage.size.x && mousePos.y > g.nextPage.position.y && mousePos.y < g.nextPage.position.y + g.nextPage.size.y) {
-        return true;
-    }
-    return false;
+    return mousePos.x > g.nextPage.position.x && mousePos.x < g.nextPage.position.x + g.nextPage.size.x && mousePos.y > g.nextPage.position.y && mousePos.y < g.nextPage.position.y + g.nextPage.size.y;
 }
 
 void updateIndex0(float timeStepSeconds, galaxy &g)
@@ -256,7 +245,6 @@ int main(int argc, char **argv)
         float startTicks = SDL_GetTicks();
         float timeStepS = 1.0f / window.getRefreshRate();
         float timeStepMs = 1000.0f / window.getRefreshRate();
-        SDL_PumpEvents();
 
         // get input
         while (SDL_PollEvent(&event))
