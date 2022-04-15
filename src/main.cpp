@@ -28,9 +28,11 @@
  * il y aura aussi un mode de trace qui permet de voir la trajectoire d'une planete.
  * et enfin si j'en ai la possibilité recréer une simulation complette du systeme solaire.
  * je m'excuse pour l'anglais en commentaire.
+ * lien du repo github : https://github.com/Jeremy3333/lifami-project-2
  */
 
 /*
+ *lien pour compiler (attention a bien mettre le chemin de votre sdl2 et sdl2_image et de le lancer dans le dossier du projet) :
  * Debug:
  * g++ -c src/*.cpp -std=c++14 -g -Wall -m64 -I include -I C:/SDL2-w64/include  && g++ *.o -o bin/debug/main -L C:/SDL2-w64/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image && start bin/debug/main
  *
