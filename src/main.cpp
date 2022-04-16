@@ -25,6 +25,7 @@
  * Mon objectif est de faire un programme qui permet de faire une simulation d'un systeme solaire en 2D avec des planetes et des lunes.
  * Il y aura posibilité de faire des mettre en pause la simulation et de deplacer les planetes et lunes(bouton rouge en bas a gauche) le bouton bleu reset la galaxie mais pas la planete selectionnée.
  * de selectionner les planetes avec la souris et de voir la simulation centrée sur cette planete(clique droit de la souris) ou de changer leur position (clique gauche de la souris).
+ * attention pour l'instant il faut que la simulation ne soit pas en pause pour que les planetes puissent bouger ou etre selectionnée.
  * il y aura aussi un mode de trace qui permet de voir la trajectoire d'une planete.
  * et enfin si j'en ai la possibilité recréer une simulation complette du systeme solaire.
  * je m'excuse pour l'anglais en commentaire.
@@ -51,6 +52,7 @@ struct planet {
     Vector2f Traces[MAX_TRACE_LENGTH];
     int TraceIndex;
     SDL_Color TraceColor;
+    bool grabbed;
 };
 
 struct button {
@@ -88,6 +90,7 @@ planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radi
         p.Traces[i] = tracePos;
     }
     p.TraceColor = TraceColor;
+    p.grabbed = false;
     return p;
 }
 
@@ -264,9 +267,14 @@ void updateIndex0(float timeStepSeconds, galaxy &g)
         // if the left click is on a planet, change the position of the planet
         for (int i = 0; i < g.nbPlanets; i++)
         {
-            if (isOnPlanet(g.planets[i], mousePos) && i != g.selectedPlanet)
+            if (isOnPlanet(g.planets[i], mousePos) && i != g.selectedPlanet && !g.planets[i].grabbed)
             {
                 g.planets[i].position = mousePos;
+                g.planets[i].grabbed = true;
+            }
+            else if(g.planets[i].grabbed && !isOnPlanet(g.planets[i], mousePos))
+            {
+                g.planets[i].grabbed = false;
             }
         }
     }
@@ -279,7 +287,7 @@ void updateIndex0(float timeStepSeconds, galaxy &g)
         // if the right click is on a planet, change the color of the planet
         for (int i = 0; i < g.nbPlanets; i++)
         {
-            if (isOnPlanet(g.planets[i], mousePos))
+            if (isOnPlanet(g.planets[i], mousePos) && i != g.selectedPlanet)
             {
                 g.selectedPlanet = i;
                 initTrace(g);
@@ -314,19 +322,22 @@ void update(float timeStepSeconds, galaxy &g, int &index)
     {
         Vector2f mousePos = initVector2f(x, y);
         //if the left click is on the button next page, change the page
-        if (isOnButton(g.nextPage, mousePos))
+        if (isOnButton(g.nextPage, mousePos) && !g.nextPage.pressed)
         {
             index++;
+            g.nextPage.pressed = true;
         }
         //if the left click is on the button reset, reset the galaxy
-        else if (isOnButton(g.reset, mousePos))
+        else if (isOnButton(g.reset, mousePos) && !g.reset.pressed)
         {
             resetGalaxy(g);
+            g.reset.pressed = true;
         }
     }
     else
     {
         g.nextPage.pressed = false;
+        g.reset.pressed = false;
     }
     //if the index is supperieur to the number of pages - 1, change the index to 0
     if (index > NUM_PAGES - 1)
