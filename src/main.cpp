@@ -17,15 +17,7 @@
 #define NUM_PAGES 2
 
 /*
- * Mon objectif est de faire un programme qui permet de faire une simulation d'un systeme solaire en 2D avec des planetes et des lunes.
- * Il y aura posibilité de faire des mettre en pause la simulation et de deplacer les planetes et lunes(bouton rouge en bas a gauche) le bouton bleu reset la galaxie mais pas la planete selectionnée.
- * de selectionner les planetes avec la souris et de voir la simulation centrée sur cette planete(clique droit de la souris) ou de changer leur position (clique gauche de la souris).
- * il y aura aussi un mode de trace qui permet de voir la trajectoire d'une planete.
- * et enfin si j'en ai la possibilité recréer une simulation complette du systeme solaire.
- * je m'excuse pour l'anglais en commentaire.
- *
- * afin de plus facilement comprendre quel includes sont mes code ou des librerie publiques j'ai indiquer en commentaire en dessus et aussi les librairies publique ont 
- * leur nom entre <> et ce que j'ai codé moi est entre ""
+ *toute la description est dans le README.md (si vous n'avez pas de lecteur de markdown il est aussi disponible sur le github qui ena un par defaut)
  *
  * lien du repo github : https://github.com/Jeremy3333/lifami-project-2
  */

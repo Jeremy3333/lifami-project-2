@@ -9,6 +9,8 @@ Il y aura posibilité:
 
 Je prévois aussi si j'ai le temps de faire une simulation de la fusion de deux champ éléctromagnétique (le bouton vert pour y accéder si il est implémenté)
 
+afin de plus facilement comprendre quel includes sont mes code ou des librerie publiques j'ai indiquer en commentaire en dessus et aussi les librairies publique ont leur nom entre <> et ce que j'ai codé moi est entre ""
+
 je m'excuse pour l'anglais en commentaire.
 
 Téléchargement
