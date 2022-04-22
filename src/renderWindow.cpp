@@ -1,7 +1,9 @@
+// include public libraries
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
 
+// include my libraries
 #include "RenderWindow.hpp"
 
 RenderWindow::RenderWindow(const char *p_title, int p_w, int p_h)
