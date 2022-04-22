@@ -9,6 +9,7 @@
 #include "Math.hpp"
 #include "Galaxy.hpp"
 #include "Utils.hpp"
+#include "Electromagnetism.hpp"
 
 
 // define global variables
@@ -42,11 +43,12 @@ struct Button {
 struct All
 {
     Galaxy g;
+    ElectromagnetismArray e;
     Button pause;
     Button nextPage;
     Button reset;
     bool paused;
-    Vector2f centerDraw;
+    int indexPage;
 };
 
 // init a button
@@ -66,36 +68,41 @@ void initAll(All &all) {
     initButton(all.nextPage, initVector2f((WINDOW_WIDTH / 2) - 30, WINDOW_HEIGHT - 50), initVector2f(60, 30), {0, 255, 0, 255});
     initButton(all.reset, initVector2f(WINDOW_WIDTH - 80, WINDOW_HEIGHT - 50), initVector2f(60, 30), {0, 0, 255, 255});
 
-    all.centerDraw = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
     all.paused = false;
     all.g.loaded = false;
+    all.indexPage = 0;
 }
 
 // draw the planet on the screen
-void draw(All all, RenderWindow &window, int Index) {
+void draw(All all, RenderWindow &window) {
 
     window.color(0, 0, 0, 255);
     window.drawBackground();
 
     // draw the galaxy if index is 0
-    if (Index == 0) {
-        drawGalaxy(all.g, window, all.centerDraw);
+    if (all.indexPage == 0)
+    {
+        drawGalaxy(all.g, window);
+    }
+    else if(all.indexPage == 1)
+    {
+        drawElectromagnetismArray(all.e, window);
     }
 
     //draw the button pause
     window.color(all.pause.color.r, all.pause.color.g, all.pause.color.b, all.pause.color.a);
-    window.fillRect(all.pause.position.x, all.pause.position.y, all.pause.size.x, all.pause.size.y);
+    window.drawRectangle(all.pause.position.x, all.pause.position.y, all.pause.size.x, all.pause.size.y);
 
     //draw the button next page
     window.color(all.nextPage.color.r, all.nextPage.color.g, all.nextPage.color.b, all.nextPage.color.a);
-    window.fillRect(all.nextPage.position.x, all.nextPage.position.y, all.nextPage.size.x, all.nextPage.size.y);
+    window.drawRectangle(all.nextPage.position.x, all.nextPage.position.y, all.nextPage.size.x, all.nextPage.size.y);
 
     //draw the button reset
     window.color(all.reset.color.r, all.reset.color.g, all.reset.color.b, all.reset.color.a);
-    window.fillRect(all.reset.position.x, all.reset.position.y, all.reset.size.x, all.reset.size.y);
+    window.drawRectangle(all.reset.position.x, all.reset.position.y, all.reset.size.x, all.reset.size.y);
 }
 
-void update(float timeStepSeconds, All &all, int &index)
+void update(float timeStepSeconds, All &all)
 {
     // increase the timestep
     timeStepSeconds *= TIMESTEPS_MULTIPLIER;
@@ -115,7 +122,7 @@ void update(float timeStepSeconds, All &all, int &index)
         //if the left click is on the button next page, change the page
         else if (isOnRect(all.nextPage.position, all.nextPage.size, mousePos) && !all.nextPage.pressed)
         {
-            index++;
+            all.indexPage++;
             all.nextPage.pressed = true;
         }
         //if the left click is on the button reset, reset the galaxy
@@ -132,23 +139,32 @@ void update(float timeStepSeconds, All &all, int &index)
         all.reset.pressed = false;
     }
     //if the index is supperieur to the number of pages - 1, change the index to 0
-    if (index >= NUM_PAGES)
+    if (all.indexPage >= NUM_PAGES)
     {
-        index = 0;
+        all.indexPage = 0;
     }
-    if (index == 0 && !all.g.loaded)
+    if (all.indexPage == 0 && !all.g.loaded)
     {
         initGalaxy(all.g);
     }
-
-    // update the position of the planets if it's the first index
-    if (index == 0)
+    else if (all.indexPage == 1 && !all.e.loaded)
     {
-        updateGalaxy(timeStepSeconds, all.g, all.centerDraw, all.paused);
+        initElectromagnetismArray(all.e);
     }
-    else
+
+    if (all.indexPage == 0)
+    {
+        all.e.loaded = false;
+    }
+    else if (all.indexPage == 1)
     {
         all.g.loaded = false;
+    }
+
+    // update the position of the planets if it's the first index
+    if (all.indexPage == 0)
+    {
+        updateGalaxy(timeStepSeconds, all.g, all.paused);
     }
 }
 
@@ -161,7 +177,6 @@ int main(int argc, char **argv)
     SDL_Event event;
     const Uint8 *state = SDL_GetKeyboardState(NULL);
     bool quit = false;
-    int index = 0;
     All all;
 
     // initialize world
@@ -186,10 +201,10 @@ int main(int argc, char **argv)
         window.clear();
 
         // update game
-        update(timeStepS, all, index);
+        update(timeStepS, all);
 
         // draw
-        draw(all, window, index);
+        draw(all, window);
 
         // update screen
         window.display();

@@ -31,12 +31,13 @@ struct Galaxy {
     int nbPlanets;
     int selectedPlanet;
     bool loaded;
+    Vector2f centerDraw;
 };
 
 Planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radius, SDL_Color color, bool moveable, SDL_Color TraceColor);
 void initGalaxy(Galaxy &g);
 void initTrace (Galaxy &g);
 void resetGalaxy(Galaxy &g);
-void drawGalaxy(Galaxy g, RenderWindow &window, Vector2f CenterDraw);
+void drawGalaxy(Galaxy g, RenderWindow &window);
 void calculateForces(Galaxy &g);
-void updateGalaxy(float timeStepSeconds, Galaxy &g, Vector2f &centerDraw, bool pause);
+void updateGalaxy(float timeStepSeconds, Galaxy &g, bool pause);
