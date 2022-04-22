@@ -25,7 +25,6 @@
  * Mon objectif est de faire un programme qui permet de faire une simulation d'un systeme solaire en 2D avec des planetes et des lunes.
  * Il y aura posibilité de faire des mettre en pause la simulation et de deplacer les planetes et lunes(bouton rouge en bas a gauche) le bouton bleu reset la galaxie mais pas la planete selectionnée.
  * de selectionner les planetes avec la souris et de voir la simulation centrée sur cette planete(clique droit de la souris) ou de changer leur position (clique gauche de la souris).
- * attention pour l'instant il faut que la simulation ne soit pas en pause pour que les planetes puissent bouger ou etre selectionnée.
  * il y aura aussi un mode de trace qui permet de voir la trajectoire d'une planete.
  * et enfin si j'en ai la possibilité recréer une simulation complette du systeme solaire.
  * je m'excuse pour l'anglais en commentaire.
@@ -69,6 +68,7 @@ struct galaxy {
     button nextPage;
     button reset;
     Vector2f centerDraw;
+    bool paused;
 };
 
 //init a planet
@@ -128,6 +128,7 @@ void init(galaxy &g) {
 
     g.selectedPlanet = -1;
     g.centerDraw = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+    g.paused = false;
 }
 
 //init galaxy with 4 planets but save the selected planet
@@ -234,29 +235,31 @@ bool isOnButton(button b, Vector2f mousePos) {
 // update the position of the planets (only if moveable)
 void updateIndex0(float timeStepSeconds, galaxy &g)
 {
-    calculateForces(g);
-
     if(g.selectedPlanet == -1)
         g.centerDraw = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
     else
         g.centerDraw = g.planets[g.selectedPlanet].position;
 
-    // update all the planets of a galaxy
-    for (int i = 0; i < g.nbPlanets; i++)
+    if(!g.paused)
     {
-        if (g.planets[i].moveable)
+        calculateForces(g);
+
+        // update all the planets of a galaxy
+        for (int i = 0; i < g.nbPlanets; i++)
         {
-            g.planets[i].position.x += g.planets[i].velocity.x * timeStepSeconds;
-            g.planets[i].position.y += g.planets[i].velocity.y * timeStepSeconds;
-            g.planets[i].Traces[g.planets[i].TraceIndex] = getDrawPosition(g, i);
-            g.planets[i].TraceIndex++;
-            if (g.planets[i].TraceIndex >= MAX_TRACE_LENGTH)
+            if (g.planets[i].moveable)
             {
-                g.planets[i].TraceIndex = 0;
+                g.planets[i].position.x += g.planets[i].velocity.x * timeStepSeconds;
+                g.planets[i].position.y += g.planets[i].velocity.y * timeStepSeconds;
+                g.planets[i].Traces[g.planets[i].TraceIndex] = getDrawPosition(g, i);
+                g.planets[i].TraceIndex++;
+                if (g.planets[i].TraceIndex >= MAX_TRACE_LENGTH)
+                {
+                    g.planets[i].TraceIndex = 0;
+                }
             }
         }
     }
-
     // move a planet if the left click is on it
     int x, y;
     const Uint32 buttons = SDL_GetMouseState(&x, &y);
@@ -269,13 +272,14 @@ void updateIndex0(float timeStepSeconds, galaxy &g)
         {
             if (isOnPlanet(g.planets[i], mousePos) && i != g.selectedPlanet && !g.planets[i].grabbed)
             {
-                g.planets[i].position = mousePos;
                 g.planets[i].grabbed = true;
             }
             else if(g.planets[i].grabbed && !isOnPlanet(g.planets[i], mousePos))
             {
                 g.planets[i].grabbed = false;
             }
+            if(g.planets[i].grabbed)
+                g.planets[i].position = mousePos;
         }
     }
 
@@ -324,7 +328,7 @@ void update(float timeStepSeconds, galaxy &g, int &index)
         //if the left click is on the button next page, change the page
         if (isOnButton(g.nextPage, mousePos) && !g.nextPage.pressed)
         {
-            index++;
+            g.paused = !g.paused;
             g.nextPage.pressed = true;
         }
         //if the left click is on the button reset, reset the galaxy
