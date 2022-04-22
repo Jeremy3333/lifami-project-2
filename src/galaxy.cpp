@@ -40,6 +40,7 @@ void initGalaxy(Galaxy &g) {
     g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -11), 200000, 3,{255, 255, 100, 255}, true , {255, 0, 0, 255});
 
     g.selectedPlanet = -1;
+    g.loaded = true;
 }
 
 // init all the trace of all the planet at (-100,-100)
@@ -67,9 +68,6 @@ void resetGalaxy(Galaxy &g)
 //draw the galaxy if the index is 0
 void drawGalaxy(Galaxy g, RenderWindow &window, Vector2f CenterDraw)
 {
-    window.color(0, 0, 0, 255);
-    window.drawBackground();
-
     //draw all the planets of a galaxy with window.fillCircle
     for (int i = 0; i < g.nbPlanets; i++) {
         // draw the trace

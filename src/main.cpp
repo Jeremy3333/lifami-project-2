@@ -68,13 +68,14 @@ void initAll(All &all) {
 
     all.centerDraw = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
     all.paused = false;
-
-    // init galaxy
-    initGalaxy(all.g);
+    all.g.loaded = false;
 }
 
 // draw the planet on the screen
 void draw(All all, RenderWindow &window, int Index) {
+
+    window.color(0, 0, 0, 255);
+    window.drawBackground();
 
     // draw the galaxy if index is 0
     if (Index == 0) {
@@ -99,12 +100,6 @@ void update(float timeStepSeconds, All &all, int &index)
     // increase the timestep
     timeStepSeconds *= TIMESTEPS_MULTIPLIER;
 
-    // update the position of the planets if it's the first index
-    if(index == 0)
-    {
-        updateGalaxy(timeStepSeconds, all.g, all.centerDraw, all.paused);
-    }
-
     // check if the button are clicked
     int x, y;
     const Uint32 buttons = SDL_GetMouseState(&x, &y);
@@ -117,6 +112,12 @@ void update(float timeStepSeconds, All &all, int &index)
             all.paused = !all.paused;
             all.pause.pressed = true;
         }
+        //if the left click is on the button next page, change the page
+        else if (isOnRect(all.nextPage.position, all.nextPage.size, mousePos) && !all.nextPage.pressed)
+        {
+            index++;
+            all.nextPage.pressed = true;
+        }
         //if the left click is on the button reset, reset the galaxy
         else if (isOnRect(all.reset.position, all.reset.size , mousePos) && !all.reset.pressed)
         {
@@ -127,12 +128,27 @@ void update(float timeStepSeconds, All &all, int &index)
     else
     {
         all.pause.pressed = false;
+        all.nextPage.pressed = false;
         all.reset.pressed = false;
     }
     //if the index is supperieur to the number of pages - 1, change the index to 0
-    if (index > NUM_PAGES - 1)
+    if (index >= NUM_PAGES)
     {
         index = 0;
+    }
+    if (index == 0 && !all.g.loaded)
+    {
+        initGalaxy(all.g);
+    }
+
+    // update the position of the planets if it's the first index
+    if (index == 0)
+    {
+        updateGalaxy(timeStepSeconds, all.g, all.centerDraw, all.paused);
+    }
+    else
+    {
+        all.g.loaded = false;
     }
 }
 

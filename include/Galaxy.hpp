@@ -30,6 +30,7 @@ struct Galaxy {
     Planet planets[MAX_PLANETS];
     int nbPlanets;
     int selectedPlanet;
+    bool loaded;
 };
 
 Planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radius, SDL_Color color, bool moveable, SDL_Color TraceColor);
