@@ -41,7 +41,7 @@
  */
 
 // define structs
-struct planet {
+struct Planet {
     Vector2f position;
     Vector2f velocity;
     double mass;
@@ -54,27 +54,33 @@ struct planet {
     bool grabbed;
 };
 
-struct button {
+struct Button {
     Vector2f position;
     Vector2f size;
     SDL_Color color;
     bool pressed;
 };
 
-struct galaxy {
-    planet planets[MAX_PLANETS];
+struct Galaxy {
+    Planet planets[MAX_PLANETS];
     int nbPlanets;
     int selectedPlanet;
-    button nextPage;
-    button reset;
-    Vector2f centerDraw;
+};
+
+struct All
+{
+    Galaxy g;
+    Button pause;
+    Button nextPage;
+    Button reset;
     bool paused;
+    Vector2f centerDraw;
 };
 
 //init a planet
-planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radius, SDL_Color color, bool moveable, SDL_Color TraceColor)
+Planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radius, SDL_Color color, bool moveable, SDL_Color TraceColor)
 {
-    planet p;
+    Planet p;
     p.position = position;
     p.velocity = velocity;
     p.mass = mass;
@@ -95,7 +101,7 @@ planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radi
 }
 
 // init all the trace of all the planet at (-100,-100)
-void initTrace (galaxy &g)
+void initTrace (Galaxy &g)
 {
     for(int i = 0; i < g.nbPlanets; i++)
     {
@@ -106,66 +112,64 @@ void initTrace (galaxy &g)
     }
 }
 
+// init a button
+void initButton(Button &b, Vector2f position, Vector2f size, SDL_Color color)
+{
+    b.position = position;
+    b.size = size;
+    b.color = color;
+    b.pressed = false;
+}
+
 //init galaxy with 4 planets and no selected planet
-void init(galaxy &g) {
+void initGalaxy(Galaxy &g) {
     g.nbPlanets = 4;
-    g.planets[0] = initPlanet(initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), initVector2f(0, 0), 20000000000000, 10, {255, 255, 100, 255}, true, {255, 0, 0, 255});
+    g.planets[0] = initPlanet(initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), initVector2f(0, 0), 20000000000000, 10, {255, 255, 255, 255}, false, {255, 0, 0, 255});
     g.planets[1] = initPlanet(initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2), initVector2f(0, 20), 20000000000, 5, {255, 255, 100, 255}, true, {255, 0, 0, 255});
     g.planets[2] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2), initVector2f(0, -20), 200000000000, 7, {255, 255, 100, 255}, true, {255, 0, 0, 255});
     g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -11), 200000, 3,{255, 255, 100, 255}, true , {255, 0, 0, 255});
 
-    //init button next page
-    g.nextPage.position = initVector2f(20, WINDOW_HEIGHT - 50);
-    g.nextPage.size = initVector2f(60, 30);
-    g.nextPage.color = {255, 0, 0, 255};
-    g.nextPage.pressed = false;
-
-    //init button reset
-    g.reset.position = initVector2f(WINDOW_WIDTH - 80, WINDOW_HEIGHT - 50);
-    g.reset.size = initVector2f(60, 30);
-    g.reset.color = {0, 0, 255, 255};
-    g.reset.pressed = false;
-
     g.selectedPlanet = -1;
-    g.centerDraw = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
-    g.paused = false;
+}
+
+//init all
+void initAll(All &all) {
+
+    // init all the buttons
+    initButton(all.pause, initVector2f(20, WINDOW_HEIGHT - 50), initVector2f(60, 30), {255, 0, 0, 255});
+    initButton(all.nextPage, initVector2f((WINDOW_WIDTH / 2) - 30, WINDOW_HEIGHT - 50), initVector2f(60, 30), {0, 255, 0, 255});
+    initButton(all.reset, initVector2f(WINDOW_WIDTH - 80, WINDOW_HEIGHT - 50), initVector2f(60, 30), {0, 0, 255, 255});
+
+    all.centerDraw = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+    all.paused = false;
+
+    // init galaxy
+    initGalaxy(all.g);
 }
 
 //init galaxy with 4 planets but save the selected planet
-void resetGalaxy(galaxy &g)
+void resetGalaxy(Galaxy &g)
 {
     g.nbPlanets = 4;
     g.planets[0] = initPlanet(initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), initVector2f(0, 0), 20000000000000, 10, {255, 255, 100, 255}, true, {255, 0, 0, 255});
     g.planets[1] = initPlanet(initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2), initVector2f(0, 20), 20000000000, 5, {255, 255, 100, 255}, true, {255, 0, 0, 255});
     g.planets[2] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2), initVector2f(0, -20), 200000000000, 7, {255, 255, 100, 255}, true, {255, 0, 0, 255});
     g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -11), 200000, 3,{255, 255, 100, 255}, true , {255, 0, 0, 255});
-
-    //init button next page
-    g.nextPage.position = initVector2f(20, WINDOW_HEIGHT - 50);
-    g.nextPage.size = initVector2f(60, 30);
-    g.nextPage.color = {255, 0, 0, 255};
-    g.nextPage.pressed = false;
-
-    //init button reset
-    g.reset.position = initVector2f(WINDOW_WIDTH - 80, WINDOW_HEIGHT - 50);
-    g.reset.size = initVector2f(60, 30);
-    g.reset.color = {0, 0, 255, 255};
-    g.reset.pressed = false;
-
 }
 
 // return the position where to draw the planet on the screen if centerDraw is the center of the screen
-Vector2f getDrawPosition(galaxy &g, int planetIndex) {
-    return initVector2f(g.planets[planetIndex].position.x - g.centerDraw.x + (WINDOW_WIDTH/2), g.planets[planetIndex].position.y - g.centerDraw.y + (WINDOW_HEIGHT/2));
+Vector2f getDrawPosition(Galaxy g, int planetIndex, Vector2f centerDraw) {
+    return initVector2f(g.planets[planetIndex].position.x - centerDraw.x + (WINDOW_WIDTH/2), g.planets[planetIndex].position.y - centerDraw.y + (WINDOW_HEIGHT/2));
 }
 
 // return the position of the planet from the screen position
-Vector2f getPositionFromScreenPosition(galaxy &g, Vector2f screenPosition) {
-    return initVector2f(screenPosition.x + g.centerDraw.x - (WINDOW_WIDTH/2), screenPosition.y + g.centerDraw.y - (WINDOW_HEIGHT/2));
+Vector2f getPositionFromScreenPosition(Vector2f centerDraw, Vector2f screenPosition) {
+    return initVector2f(screenPosition.x + centerDraw.x - (WINDOW_WIDTH/2), screenPosition.y + centerDraw.y - (WINDOW_HEIGHT/2));
 }
 
-// draw the planet on the screen
-void draw(galaxy g, RenderWindow &window) {
+//draw the galaxy if the index is 0
+void drawGalaxy(Galaxy g, RenderWindow &window, Vector2f CenterDraw)
+{
     window.color(0, 0, 0, 255);
     window.drawBackground();
 
@@ -182,26 +186,34 @@ void draw(galaxy g, RenderWindow &window) {
         }
         // draw the planet
         window.color(g.planets[i].color.r, g.planets[i].color.g, g.planets[i].color.b, g.planets[i].color.a);
-        Vector2f drawPosition = getDrawPosition(g, i);
+        Vector2f drawPosition = getDrawPosition(g, i, CenterDraw);
         window.fillCircle(drawPosition.x, drawPosition.y, g.planets[i].radius);
     }
-
-    //draw the button next page
-    window.color(g.nextPage.color.r, g.nextPage.color.g, g.nextPage.color.b, g.nextPage.color.a);
-    window.fillRect(g.nextPage.position.x, g.nextPage.position.y, g.nextPage.size.x, g.nextPage.size.y);
-
-    //draw the button reset
-    window.color(g.reset.color.r, g.reset.color.g, g.reset.color.b, g.reset.color.a);
-    window.fillRect(g.reset.position.x, g.reset.position.y, g.reset.size.x, g.reset.size.y);
 }
 
-//calculate the distance between two Vector2f
-double distance(Vector2f v1, Vector2f v2) {
-    return sqrt(pow(v1.x - v2.x, 2) + pow(v1.y - v2.y, 2));
+// draw the planet on the screen
+void draw(All all, RenderWindow &window, int Index) {
+
+    // draw the galaxy if index is 0
+    if (Index == 0) {
+        drawGalaxy(all.g, window, all.centerDraw);
+    }
+
+    //draw the button pause
+    window.color(all.pause.color.r, all.pause.color.g, all.pause.color.b, all.pause.color.a);
+    window.fillRect(all.pause.position.x, all.pause.position.y, all.pause.size.x, all.pause.size.y);
+
+    //draw the button next page
+    window.color(all.nextPage.color.r, all.nextPage.color.g, all.nextPage.color.b, all.nextPage.color.a);
+    window.fillRect(all.nextPage.position.x, all.nextPage.position.y, all.nextPage.size.x, all.nextPage.size.y);
+
+    //draw the button reset
+    window.color(all.reset.color.r, all.reset.color.g, all.reset.color.b, all.reset.color.a);
+    window.fillRect(all.reset.position.x, all.reset.position.y, all.reset.size.x, all.reset.size.y);
 }
 
 //calculate the force between two planets
-Vector2f gForce(planet p1, planet p2) {
+Vector2f gForce(Planet p1, Planet p2) {
     Vector2f force;
     double dist = distance(p1.position, p2.position);
     double forceMagnitude = (G * p1.mass * p2.mass) / pow(dist, 2);
@@ -212,7 +224,7 @@ Vector2f gForce(planet p1, planet p2) {
 
 
 // calculate the force between all planets with gForce function
-void calculateForces(galaxy &g) {
+void calculateForces(Galaxy &g) {
     for (int i = 0; i < g.nbPlanets; i++) {
         for (int j = 0; j < g.nbPlanets; j++) {
             if (i != j) {
@@ -223,24 +235,24 @@ void calculateForces(galaxy &g) {
 }
 
 // verifie if the left click is on a planet
-bool isOnPlanet(planet p, Vector2f mousePos) {
+bool isOnPlanet(Planet p, Vector2f mousePos) {
     return distance(p.position, mousePos) < p.radius;
 }
 
 //verifies if the mouse click the button
-bool isOnButton(button b, Vector2f mousePos) {
+bool isOnButton(Button b, Vector2f mousePos) {
     return mousePos.x > b.position.x && mousePos.x < b.position.x + b.size.x && mousePos.y > b.position.y && mousePos.y < b.position.y + b.size.y;
 }
 
 // update the position of the planets (only if moveable)
-void updateIndex0(float timeStepSeconds, galaxy &g)
+void updateGalaxy(float timeStepSeconds, Galaxy &g, Vector2f &centerDraw, bool pause)
 {
     if(g.selectedPlanet == -1)
-        g.centerDraw = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+        centerDraw = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
     else
-        g.centerDraw = g.planets[g.selectedPlanet].position;
+        centerDraw = g.planets[g.selectedPlanet].position;
 
-    if(!g.paused)
+    if(!pause)
     {
         calculateForces(g);
 
@@ -251,7 +263,7 @@ void updateIndex0(float timeStepSeconds, galaxy &g)
             {
                 g.planets[i].position.x += g.planets[i].velocity.x * timeStepSeconds;
                 g.planets[i].position.y += g.planets[i].velocity.y * timeStepSeconds;
-                g.planets[i].Traces[g.planets[i].TraceIndex] = getDrawPosition(g, i);
+                g.planets[i].Traces[g.planets[i].TraceIndex] = getDrawPosition(g, i, centerDraw);
                 g.planets[i].TraceIndex++;
                 if (g.planets[i].TraceIndex >= MAX_TRACE_LENGTH)
                 {
@@ -266,7 +278,7 @@ void updateIndex0(float timeStepSeconds, galaxy &g)
     if(buttons == LEFT_MOUSE_BUTTON)
     {
         Vector2f mousePos = initVector2f(x, y);
-        mousePos = getPositionFromScreenPosition(g, mousePos);
+        mousePos = getPositionFromScreenPosition(centerDraw, mousePos);
         // if the left click is on a planet, change the position of the planet
         for (int i = 0; i < g.nbPlanets; i++)
         {
@@ -287,7 +299,7 @@ void updateIndex0(float timeStepSeconds, galaxy &g)
     else if (buttons == RIGHT_MOUSE_BUTTON)
     {
         Vector2f mousePos = initVector2f(x, y);
-        mousePos = getPositionFromScreenPosition(g, mousePos);
+        mousePos = getPositionFromScreenPosition(centerDraw, mousePos);
         // if the right click is on a planet, change the color of the planet
         for (int i = 0; i < g.nbPlanets; i++)
         {
@@ -308,7 +320,7 @@ void updateIndex0(float timeStepSeconds, galaxy &g)
 }
 
 
-void update(float timeStepSeconds, galaxy &g, int &index)
+void update(float timeStepSeconds, All &all, int &index)
 {
     // increase the timestep
     timeStepSeconds *= TIMESTEPS_MULTIPLIER;
@@ -316,7 +328,7 @@ void update(float timeStepSeconds, galaxy &g, int &index)
     // update the position of the planets if it's the first index
     if(index == 0)
     {
-        updateIndex0(timeStepSeconds, g);
+        updateGalaxy(timeStepSeconds, all.g, all.centerDraw, all.paused);
     }
 
     // check if the button are clicked
@@ -326,22 +338,22 @@ void update(float timeStepSeconds, galaxy &g, int &index)
     {
         Vector2f mousePos = initVector2f(x, y);
         //if the left click is on the button next page, change the page
-        if (isOnButton(g.nextPage, mousePos) && !g.nextPage.pressed)
+        if (isOnButton(all.pause, mousePos) && !all.pause.pressed)
         {
-            g.paused = !g.paused;
-            g.nextPage.pressed = true;
+            all.paused = !all.paused;
+            all.pause.pressed = true;
         }
         //if the left click is on the button reset, reset the galaxy
-        else if (isOnButton(g.reset, mousePos) && !g.reset.pressed)
+        else if (isOnButton(all.reset, mousePos) && !all.reset.pressed)
         {
-            resetGalaxy(g);
-            g.reset.pressed = true;
+            resetGalaxy(all.g);
+            all.reset.pressed = true;
         }
     }
     else
     {
-        g.nextPage.pressed = false;
-        g.reset.pressed = false;
+        all.pause.pressed = false;
+        all.reset.pressed = false;
     }
     //if the index is supperieur to the number of pages - 1, change the index to 0
     if (index > NUM_PAGES - 1)
@@ -359,11 +371,11 @@ int main(int argc, char **argv)
     SDL_Event event;
     const Uint8 *state = SDL_GetKeyboardState(NULL);
     bool quit = false;
-    galaxy g;
     int index = 0;
+    All all;
 
     // initialize world
-    init(g);
+    initAll(all);
 
     // main loop
     while (!quit)
@@ -384,10 +396,10 @@ int main(int argc, char **argv)
         window.clear();
 
         // update game
-        update(timeStepS, g, index);
+        update(timeStepS, all, index);
 
         // draw
-        draw(g, window);
+        draw(all, window, index);
 
         // update screen
         window.display();
