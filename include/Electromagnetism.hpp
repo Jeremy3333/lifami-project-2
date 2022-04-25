@@ -8,7 +8,7 @@
 #include "RenderWindow.hpp"
 
 #define MAX_ELECTROMAGNETS 10
-#define CASE_SIZE 10
+#define CASE_SIZE 2
 
 // define struct of electromagnetic particle
 struct Electromagnetism {
