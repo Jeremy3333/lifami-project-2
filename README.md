@@ -1,6 +1,8 @@
 LIFAMI-PROJET
 =======
 
+###### Jérémy SIMOND
+
 Mon objectif est de faire un programme qui permet de faire une simulation de gravité entre planètes en 2D.
 Il y aura posibilité:
  - de faire des mettre en pause la simulation (bouton rouge en bas a gauche) et de deplacer les planetes le bouton bleu remet a zéro la galaxie mais pas la planete selectionnée.
