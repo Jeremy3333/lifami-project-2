@@ -15,6 +15,8 @@ afin de plus facilement comprendre quel includes sont mes code ou des librerie p
 
 je m'excuse pour l'anglais en commentaire.
 
+actuellement la partie éléctromagnétique ne marche pas du tout mais le bouton vert est fonctionnelle.
+
 Téléchargement
 --------
 
