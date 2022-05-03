@@ -70,7 +70,7 @@ void initAll(All &all) {
 
     all.paused = false;
     all.g.loaded = false;
-    all.indexPage = 0;
+    all.indexPage = 1;
 }
 
 // draw the planet on the screen

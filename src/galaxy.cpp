@@ -77,7 +77,7 @@ void drawGalaxy(Galaxy g, RenderWindow &window)
         {
             for(int j = 0; j < MAX_TRACE_LENGTH; j++)
             {
-                window.fillCircle(g.planets[i].Traces[j].x, g.planets[i].Traces[j].y, 1);
+                window.drawPoint(g.planets[i].Traces[j].x, g.planets[i].Traces[j].y);
             }
         }
         // draw the planet

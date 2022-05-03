@@ -18,7 +18,7 @@ void initElectromagnetism(Electromagnetism &e, Vector2f position, Vector2f veloc
 void initElectromagnetismArray(ElectromagnetismArray &e)
 {
     e.nbParticles = 1;
-    initElectromagnetism(e.particles[0], initVector2f(0, 0), initVector2f(0, 0), 5, {0, 255, 0, 255});
+    initElectromagnetism(e.particles[0], initVector2f(0, 0), initVector2f(0, 0), 0.5, {0, 255, 0, 255});
     // initElectromagnetism(e.particles[0], initVector2f(50, 50), initVector2f(0, 0), 1, {0, 255, 0, 255});
     e.loaded = true;
 }
@@ -56,10 +56,10 @@ void calculateEquation(float beta[5], float & r_sqr, ElectromagnetismArray e, in
         {
             i3 = i2;
             j3 = -j2;
-            beta[nb] = 1;
+            beta[nb] = 0;
             // for(int x = 0; x < e.nbParticles; x++)
             // {
-                beta[nb] += e.particles[0].radius / sqrt(pow(i3 -e.particles[0].position.x, 2) +pow(j3 -e.particles[0].position.y, 2));
+                beta[nb] += 1 / (sqrt(pow(i3 -e.particles[0].position.x, 2) +pow(j3 -e.particles[0].position.y, 2)) * e.particles[0].radius);
             // }
             nb++;
         }
