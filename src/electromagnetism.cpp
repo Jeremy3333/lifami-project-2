@@ -17,9 +17,9 @@ void initElectromagnetism(Electromagnetism &e, Vector2f position, Vector2f veloc
 // init an array of electromagnetic particles with 1 particules
 void initElectromagnetismArray(ElectromagnetismArray &e)
 {
-    e.nbParticles = 1;
+    e.nbParticles = 2;
     initElectromagnetism(e.particles[0], initVector2f(0, 0), initVector2f(0, 0), 0.5, {0, 255, 0, 255});
-    // initElectromagnetism(e.particles[0], initVector2f(50, 50), initVector2f(0, 0), 1, {0, 255, 0, 255});
+    initElectromagnetism(e.particles[0], initVector2f(50, 50), initVector2f(0, 0), 1, {0, 255, 0, 255});
     e.loaded = true;
 }
 
@@ -29,7 +29,7 @@ int countInferior(float point[4], float answer, int index[4])
     int nb = 0;
     for(int i = 0; i < 4; i++)
     {
-        if(point[i] <= answer)
+        if(point[i] >= answer)
         {
             index[nb] = i;
             nb++;
@@ -48,18 +48,17 @@ float ruleOfThree(float a, float b, float c)
 void calculateEquation(float beta[5], float & r_sqr, ElectromagnetismArray e, int i, int j)
 {
     int nb = 0;
-    r_sqr = 1;
+    r_sqr = 0;
     float i3, j3;
     for(float i2 = i; i2 <= i + 1; i2++)
     {
         for(float j2 = j; j2 >= j - 1; j2--)
         {
-            i3 = i2;
-            j3 = -j2;
+            i3 = i2/50;
+            j3 = -j2/50;
             beta[nb] = 0;
             // for(int x = 0; x < e.nbParticles; x++)
             // {
-                beta[nb] += 1 / (sqrt(pow(i3 -e.particles[0].position.x, 2) +pow(j3 -e.particles[0].position.y, 2)) * e.particles[0].radius);
             // }
             nb++;
         }
