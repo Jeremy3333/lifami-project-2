@@ -17,9 +17,12 @@ void initElectromagnetism(Electromagnetism &e, Vector2f position, Vector2f veloc
 // init an array of electromagnetic particles with 1 particules
 void initElectromagnetismArray(ElectromagnetismArray &e)
 {
-    e.nbParticles = 2;
-    initElectromagnetism(e.particles[0], initVector2f(0, 0), initVector2f(0, 0), 2, {0, 255, 0, 255});
-    initElectromagnetism(e.particles[1], initVector2f(-10, 2), initVector2f(1, 0), 1, {0, 255, 0, 255});
+    e.nbParticles = 5;
+    initElectromagnetism(e.particles[0], initVector2f(0, 0), initVector2f(16, 8), 6, {0, 255, 0, 255});
+    initElectromagnetism(e.particles[1], initVector2f(7, 15), initVector2f(8, -16), 2.8, {0, 255, 0, 255});
+    initElectromagnetism(e.particles[2], initVector2f(10, -10), initVector2f(-8, -8), 2, {0, 255, 0, 255});
+    initElectromagnetism(e.particles[3], initVector2f(-15, 7), initVector2f(-16, 8), 3.9, {0, 255, 0, 255});
+    initElectromagnetism(e.particles[4], initVector2f(-10, -10), initVector2f(8, 8), 8, {0, 255, 0, 255});
     e.loaded = true;
 }
 
@@ -54,8 +57,8 @@ void calculateEquation(float beta[5], float & r_sqr, ElectromagnetismArray e, in
     {
         for(float j2 = j; j2 >= j - 1; j2--)
         {
-            i3 = i2/5;
-            j3 = -j2/5;
+            i3 = i2;
+            j3 = -j2;
             beta[nb] = 0;
             for(int x = 0; x < e.nbParticles; x++)
             {
@@ -167,6 +170,20 @@ void drawCalculedLine(RenderWindow &window, ElectromagnetismArray e, int i, int 
                 }
 }
 
+void drawElectromagnetismArray(ElectromagnetismArray e, RenderWindow &window)
+{
+    float i, j;
+    for(i = -((WINDOW_WIDTH / CASE_SIZE)/2); i < (WINDOW_WIDTH / CASE_SIZE)/2; i++)
+    {
+        for(j = -((WINDOW_HEIGHT / CASE_SIZE)/2); j < (WINDOW_HEIGHT / CASE_SIZE)/2; j++)
+        {
+            float t = (i + (WINDOW_WIDTH / CASE_SIZE)/2) / (WINDOW_WIDTH / CASE_SIZE);
+            window.color(255 * (1 - t) + 167 * t, 87 * (1 - t) + 4 * t, 185 * (1 - t) + 185 * t, 255);
+            drawCalculedLine(window, e, i, j);
+        }
+    }
+}
+
 void updateElectromagnetismArray(float timeStepSeconds, ElectromagnetismArray &e, bool pause)
 {
     if(!pause)
@@ -174,28 +191,16 @@ void updateElectromagnetismArray(float timeStepSeconds, ElectromagnetismArray &e
         for(int i = 0; i < e.nbParticles; i++)
         {
             e.particles[i].position += e.particles[i].velocity * timeStepSeconds;
-            e.particles[i].position.print();
-        }
-    }
-}
-void drawElectromagnetismArray(ElectromagnetismArray e, RenderWindow &window)
-{
-    int i, j;
-    for(i = -((WINDOW_WIDTH / CASE_SIZE)/2); i < (WINDOW_WIDTH / CASE_SIZE)/2; i++)
-    {
-        for(j = -((WINDOW_HEIGHT / CASE_SIZE)/2); j < (WINDOW_HEIGHT / CASE_SIZE)/2; j++)
-        {
-            window.color(0, 0, 255, 255);
-            drawCalculedLine(window, e, i, j);
-            float t = 1;
-            for(int x = 0; x < e.nbParticles; x++)
-                t +=  e.particles[x].radius / sqrt(pow(i - e.particles[x].position.x, 2) + pow(j - e.particles[x].position.y, 2));
-            if(t <= 1)
-                window.color(0, 255, 0, 255);
-            else
-                window.color(255, 0, 0, 255);
-            Vector2f drawPos = initVector2f(i * CASE_SIZE, j * CASE_SIZE);
-            window.drawPoint(drawPos.x + WINDOW_WIDTH / 2, drawPos.y + WINDOW_HEIGHT / 2);
+            //verifie if the particle is outside the screen and if it is, inverse its velocity
+            if(e.particles[i].position.x - e.particles[i].radius < -((WINDOW_WIDTH / CASE_SIZE)/2) || e.particles[i].position.x + e.particles[i].radius > (WINDOW_WIDTH/CASE_SIZE)/2)
+            {
+                e.particles[i].velocity.x *= -1;
+            }
+
+            if(e.particles[i].position.y - e.particles[i].radius < -((WINDOW_HEIGHT / CASE_SIZE)/2) || e.particles[i].position.y + e.particles[i].radius > (WINDOW_HEIGHT/CASE_SIZE)/2)
+            {
+                e.particles[i].velocity.y *= -1;
+            }
         }
     }
 }

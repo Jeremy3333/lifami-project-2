@@ -70,7 +70,7 @@ void initAll(All &all) {
 
     all.paused = false;
     all.g.loaded = false;
-    all.indexPage = 1;
+    all.indexPage = 0;
 }
 
 // draw the planet on the screen
@@ -129,6 +129,7 @@ void update(float timeStepSeconds, All &all)
         else if (isOnRect(all.reset.position, all.reset.size , mousePos) && !all.reset.pressed)
         {
             resetGalaxy(all.g);
+            initElectromagnetismArray(all.e);
             all.reset.pressed = true;
         }
     }
