@@ -166,6 +166,10 @@ void update(float timeStepSeconds, All &all)
     {
         updateGalaxy(timeStepSeconds, all.g, all.paused);
     }
+    else if (all.indexPage == 1)
+    {
+        updateElectromagnetismArray(timeStepSeconds, all.e, all.paused);
+    }
 }
 
 int main(int argc, char **argv)

@@ -23,6 +23,13 @@ Vector2f operator+(const Vector2f &lhs, const Vector2f &rhs)
     return initVector2f(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 
+Vector2f operator+=(Vector2f &lhs, const Vector2f &rhs)
+{
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    return lhs;
+}
+
 Vector2f operator/(const Vector2f &lhs, float rhs)
 {
     return initVector2f(lhs.x / rhs, lhs.y / rhs);

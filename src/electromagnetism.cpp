@@ -18,8 +18,8 @@ void initElectromagnetism(Electromagnetism &e, Vector2f position, Vector2f veloc
 void initElectromagnetismArray(ElectromagnetismArray &e)
 {
     e.nbParticles = 2;
-    initElectromagnetism(e.particles[0], initVector2f(0, 0), initVector2f(0, 0), 0.5, {0, 255, 0, 255});
-    initElectromagnetism(e.particles[0], initVector2f(50, 50), initVector2f(0, 0), 1, {0, 255, 0, 255});
+    initElectromagnetism(e.particles[0], initVector2f(0, 0), initVector2f(0, 0), 2, {0, 255, 0, 255});
+    initElectromagnetism(e.particles[1], initVector2f(-10, 2), initVector2f(1, 0), 1, {0, 255, 0, 255});
     e.loaded = true;
 }
 
@@ -48,18 +48,19 @@ float ruleOfThree(float a, float b, float c)
 void calculateEquation(float beta[5], float & r_sqr, ElectromagnetismArray e, int i, int j)
 {
     int nb = 0;
-    r_sqr = 0;
+    r_sqr = 1;
     float i3, j3;
     for(float i2 = i; i2 <= i + 1; i2++)
     {
         for(float j2 = j; j2 >= j - 1; j2--)
         {
-            i3 = i2/50;
-            j3 = -j2/50;
+            i3 = i2/5;
+            j3 = -j2/5;
             beta[nb] = 0;
-            // for(int x = 0; x < e.nbParticles; x++)
-            // {
-            // }
+            for(int x = 0; x < e.nbParticles; x++)
+            {
+                beta[nb] += e.particles[x].radius / sqrt(pow(i3 -e.particles[x].position.x, 2) +pow(j3 -e.particles[x].position.y, 2));
+            }
             nb++;
         }
     }
@@ -166,6 +167,17 @@ void drawCalculedLine(RenderWindow &window, ElectromagnetismArray e, int i, int 
                 }
 }
 
+void updateElectromagnetismArray(float timeStepSeconds, ElectromagnetismArray &e, bool pause)
+{
+    if(!pause)
+    {
+        for(int i = 0; i < e.nbParticles; i++)
+        {
+            e.particles[i].position += e.particles[i].velocity * timeStepSeconds;
+            e.particles[i].position.print();
+        }
+    }
+}
 void drawElectromagnetismArray(ElectromagnetismArray e, RenderWindow &window)
 {
     int i, j;

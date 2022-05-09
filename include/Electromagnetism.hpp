@@ -28,3 +28,4 @@ struct ElectromagnetismArray {
 void initElectromagnetism(Electromagnetism &e, Vector2f position, Vector2f velocity, double radius, SDL_Color color);
 void initElectromagnetismArray(ElectromagnetismArray &e);
 void drawElectromagnetismArray(ElectromagnetismArray e, RenderWindow &window);
+void updateElectromagnetismArray(float timeStepSeconds, ElectromagnetismArray &e, bool pause);
