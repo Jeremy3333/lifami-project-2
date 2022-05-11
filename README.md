@@ -22,7 +22,7 @@ J'ai créer une simulation de gravité car je me desais que c'était à ma port�
 
 J'ai d'abord créer deux structure une de planete et une de galaxy (décrie en commentaire) en suite quand la galaxie est initialisée elle initiallise ses planète qui elle initiallise leur traces quand le bouton bleu est appuié la galaxy est réinitialliser (mais pas la planète sélectionnée) à chaque tour de la boucle chaque gravité entre planète est calculée
 
-![equation-gravité](http://www.sciweavers.org/tex2img.php?eq=%20%5Cfrac%7BG%20%2A%20m_1%20%2A%20m_2%7D%7Bdisance%5E%7B2%7D%7D%20&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0)
+![equation-gravité](media/img/gravite.png?raw=true "gravté")
 
 en suite avec ca on calcule la vélocité puis la nouvelle position. Après ça la nouvelle position est ajoutée dans le tableau de trace à l'index de la trace qui lui augmante de un. en suite les planète son dessinée sur le rendu (avec la position et le rayon) et les traces (un point a chaque position de la trace). Pour la decentralisation du dessin (quand je veux que le centre de l'écran soit une planète) j'ai utilisé une fonction avant de dessiné une planète (getDrawPosition dans utils.cpp)
 
@@ -38,7 +38,7 @@ tout d'abord pour le dessin des équations. mon draw calcule l'équation au poin
 
 pour le calcule j'ai utiliser la fonction simplifiée
 
-![equation particule simplifiée](http://www.sciweavers.org/tex2img.php?eq=%20%5Cfrac%7BR%7D%7B%20%5Csqrt%7B%28x%20-%20part_x%29%5E%7B2%7D%2B%28y%20-%20part_y%29%5E%7B2%7D%7D%20%7D%20&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0)
+![equation particule simplifiée](media/img/electromagnetisme.png?raw=true "électromagnetisme")
 
 pour chaque particule et comme ca calcule un vecteur pour les faire interagire entre eux il suffit de tous les additionné a chaque point (avant de se servire du résulta pour faire un rendu) et pour le 1 il s'agit juste d'un changement entre le rayon qui est normalement en résulta et le 1 qui est normalement en haut de la fraction afin de rendre la fraction plous simple a calculer on peux les echangé (car il s'agit d'un inequation)
 
