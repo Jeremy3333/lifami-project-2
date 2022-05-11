@@ -38,7 +38,7 @@ tout d'abord pour le dessin des équations. mon draw calcule l'équation au poin
 
 pour le calcule j'ai utiliser la fonction simplifiée
 
-![equation particule simplifiée](http://www.sciweavers.org/tex2img.php?eq=%20%5Cfrac%7BR%7D%7B%20%5Csqrt%7B%28x%20-%20particule_x%29%5E%7B2%7D%20%2B%20%28y%20-%20particule_y%29%5E%7B2%7D%7D%20%7D%20&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0)
+![equation particule simplifiée](http://www.sciweavers.org/tex2img.php?eq=%20%5Cfrac%7BR%7D%7B%20%5Csqrt%7B%28x%20-%20part_x%29%5E%7B2%7D%2B%28y%20-%20part_y%29%5E%7B2%7D%7D%20%7D%20&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0)
 
 pour chaque particule et comme ca calcule un vecteur pour les faire interagire entre eux il suffit de tous les additionné a chaque point (avant de se servire du résulta pour faire un rendu) et pour le 1 il s'agit juste d'un changement entre le rayon qui est normalement en résulta et le 1 qui est normalement en haut de la fraction afin de rendre la fraction plous simple a calculer on peux les echangé (car il s'agit d'un inequation)
 
