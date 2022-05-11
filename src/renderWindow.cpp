@@ -122,7 +122,7 @@ void RenderWindow::fillCircle(float x, float y, float radius)
     }
 }
 
-void RenderWindow::fillRect(int x, int y, int w, int h)
+void RenderWindow::drawRectangle(int x, int y, int w, int h)
 {
     SDL_Rect rect = {x, y, w, h};
     SDL_RenderFillRect(renderer, &rect);

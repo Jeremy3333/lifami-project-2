@@ -40,6 +40,8 @@ void initGalaxy(Galaxy &g) {
     g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -11), 200000, 3,{255, 255, 100, 255}, true , {255, 0, 0, 255});
 
     g.selectedPlanet = -1;
+    g.loaded = true;
+    g.centerDraw = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 }
 
 // init all the trace of all the planet at (-100,-100)
@@ -65,11 +67,8 @@ void resetGalaxy(Galaxy &g)
 }
 
 //draw the galaxy if the index is 0
-void drawGalaxy(Galaxy g, RenderWindow &window, Vector2f CenterDraw)
+void drawGalaxy(Galaxy g, RenderWindow &window)
 {
-    window.color(0, 0, 0, 255);
-    window.drawBackground();
-
     //draw all the planets of a galaxy with window.fillCircle
     for (int i = 0; i < g.nbPlanets; i++) {
         // draw the trace
@@ -78,12 +77,12 @@ void drawGalaxy(Galaxy g, RenderWindow &window, Vector2f CenterDraw)
         {
             for(int j = 0; j < MAX_TRACE_LENGTH; j++)
             {
-                window.fillCircle(g.planets[i].Traces[j].x, g.planets[i].Traces[j].y, 1);
+                window.drawPoint(g.planets[i].Traces[j].x, g.planets[i].Traces[j].y);
             }
         }
         // draw the planet
         window.color(g.planets[i].color.r, g.planets[i].color.g, g.planets[i].color.b, g.planets[i].color.a);
-        Vector2f drawPosition = getDrawPosition(g.planets[i].position , CenterDraw);
+        Vector2f drawPosition = getDrawPosition(g.planets[i].position , g.centerDraw);
         window.fillCircle(drawPosition.x, drawPosition.y, g.planets[i].radius);
     }
 }
@@ -100,12 +99,12 @@ void calculateForces(Galaxy &g) {
 }
 
 // update the position of the planets (only if moveable)
-void updateGalaxy(float timeStepSeconds, Galaxy &g, Vector2f &centerDraw, bool pause)
+void updateGalaxy(float timeStepSeconds, Galaxy &g, bool pause)
 {
     if(g.selectedPlanet == -1)
-        centerDraw = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+        g.centerDraw = initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
     else
-        centerDraw = g.planets[g.selectedPlanet].position;
+        g.centerDraw = g.planets[g.selectedPlanet].position;
 
     if(!pause)
     {
@@ -118,7 +117,7 @@ void updateGalaxy(float timeStepSeconds, Galaxy &g, Vector2f &centerDraw, bool p
             {
                 g.planets[i].position.x += g.planets[i].velocity.x * timeStepSeconds;
                 g.planets[i].position.y += g.planets[i].velocity.y * timeStepSeconds;
-                g.planets[i].Traces[g.planets[i].TraceIndex] = getDrawPosition(g.planets[i].position ,centerDraw);
+                g.planets[i].Traces[g.planets[i].TraceIndex] = getDrawPosition(g.planets[i].position ,g.centerDraw);
                 g.planets[i].TraceIndex++;
                 if (g.planets[i].TraceIndex >= MAX_TRACE_LENGTH)
                 {
@@ -133,7 +132,7 @@ void updateGalaxy(float timeStepSeconds, Galaxy &g, Vector2f &centerDraw, bool p
     if(buttons == LEFT_MOUSE_BUTTON)
     {
         Vector2f mousePos = initVector2f(x, y);
-        mousePos = getPositionFromScreenPosition(centerDraw, mousePos);
+        mousePos = getPositionFromScreenPosition(g.centerDraw, mousePos);
         // if the left click is on a planet, change the position of the planet
         for (int i = 0; i < g.nbPlanets; i++)
         {
@@ -154,7 +153,7 @@ void updateGalaxy(float timeStepSeconds, Galaxy &g, Vector2f &centerDraw, bool p
     else if (buttons == RIGHT_MOUSE_BUTTON)
     {
         Vector2f mousePos = initVector2f(x, y);
-        mousePos = getPositionFromScreenPosition(centerDraw, mousePos);
+        mousePos = getPositionFromScreenPosition(g.centerDraw, mousePos);
         // if the right click is on a planet, change the color of the planet
         for (int i = 0; i < g.nbPlanets; i++)
         {

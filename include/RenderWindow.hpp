@@ -14,7 +14,7 @@ public:
     void display();
     void color(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
     void fillCircle(float x, float y, float r);
-    void fillRect(int x, int y, int w, int h);
+    void drawRectangle(int x, int y, int w, int h);
     void drawLine(float x1, float y1, float x2, float y2);
     void drawPoint(float x, float y);
     void drawBackground();

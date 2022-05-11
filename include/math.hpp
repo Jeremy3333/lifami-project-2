@@ -15,6 +15,7 @@ struct Vector2f
 Vector2f initVector2f(double x, double y);
 Vector2f operator-(const Vector2f &lhs, const Vector2f &rhs);
 Vector2f operator+(const Vector2f &lhs, const Vector2f &rhs);
+Vector2f operator+=(Vector2f &lhs, const Vector2f &rhs);
 Vector2f operator/(const Vector2f &lhs, float rhs);
 Vector2f operator*(const Vector2f &lhs, float rhs);
 Vector2f operator*(float rhs, const Vector2f &lhs);
