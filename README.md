@@ -40,7 +40,15 @@ pour le calcule j'ai utiliser la fonction simplifiée
 
 ![equation particule simplifiée](media/img/electromagnetisme.png?raw=true "électromagnetisme")
 
-pour chaque particule et comme ca calcule un vecteur pour les faire interagire entre eux il suffit de tous les additionné a chaque point (avant de se servire du résulta pour faire un rendu) et pour le 1 il s'agit juste d'un changement entre le rayon qui est normalement en résulta et le 1 qui est normalement en haut de la fraction afin de rendre la fraction plous simple a calculer on peux les echangé (car il s'agit d'un inequation)
+pour chaque particule et comme ca calcule un vecteur pour les faire interagire entre eux il suffit de tous les additionné a chaque point (avant de se servire du résulta pour faire un rendu) et pour le 1 il s'agit juste d'un changement entre le rayon qui est normalement en résulta et le 1 qui est normalement en haut de la fraction afin de rendre la fraction plous simple a calculer on peux les echangé (car il s'agit d'un inequation). l'équation final est donc (avec x le nombre de particule)
+
+![equation particule simplifiée somme](media/img/somme.png?raw=true "électromagnetisme somme")
+
+### - Programme principale
+
+#### - explication
+
+
 
 ---
 
