@@ -44,6 +44,8 @@ struct All
 {
     Galaxy g;
     ElectromagnetismArray e;
+    SDL_Texture *GravityEquation;
+    SDL_Texture *ElectromagnetismEquation;
     Button pause;
     Button nextPage;
     Button reset;
@@ -61,22 +63,50 @@ void initButton(Button &b, Vector2f position, Vector2f size, SDL_Color color)
 }
 
 //init all
-void initAll(All &all) {
+void initAll(All &all, RenderWindow &window) {
 
     // init all the buttons
     initButton(all.pause, initVector2f(20, WINDOW_HEIGHT - 50), initVector2f(60, 30), {255, 0, 0, 255});
     initButton(all.nextPage, initVector2f((WINDOW_WIDTH / 2) - 30, WINDOW_HEIGHT - 50), initVector2f(60, 30), {0, 255, 0, 255});
     initButton(all.reset, initVector2f(WINDOW_WIDTH - 80, WINDOW_HEIGHT - 50), initVector2f(60, 30), {0, 0, 255, 255});
 
+    //init textures
+    all.GravityEquation = window.loadTexture("media/img/gravityEquation.png");
+    all.ElectromagnetismEquation = window.loadTexture("media/img/electromagnetismEquationSomme.png");
+
     all.paused = false;
     all.g.loaded = false;
     all.indexPage = 0;
 }
 
+//draw left menu
+void drawLeftMenu(RenderWindow &window, All &all) 
+{
+
+    window.color(200, 200, 200, 255);
+    window.drawRectangle(0, 60, LEFT_MENU_WIDTH, WINDOW_HEIGHT);
+
+    window.color(200, 200, 200, 255);
+    window.drawRectangle(0, 0, LEFT_MENU_WIDTH, 60);
+
+    // draw the equation
+    if (all.indexPage == 0)
+    {
+        window.drawTexture(all.GravityEquation, 100, 30, 1);
+    }
+    else if (all.indexPage == 1)
+    {
+        window.drawTexture(all.ElectromagnetismEquation, 100, 30, 0.7);
+    }
+
+    window.color(50, 50, 50, 255);
+    window.drawLine(0, 60, LEFT_MENU_WIDTH, 60);
+}
+
 // draw the planet on the screen
 void draw(All all, RenderWindow &window) {
 
-    window.color(0, 0, 0, 255);
+    window.color(50, 50, 50, 255);
     window.drawBackground();
 
     // draw the galaxy if index is 0
@@ -88,6 +118,8 @@ void draw(All all, RenderWindow &window) {
     {
         drawElectromagnetismArray(all.e, window);
     }
+
+    drawLeftMenu(window, all);
 
     //draw the button pause
     window.color(all.pause.color.r, all.pause.color.g, all.pause.color.b, all.pause.color.a);
@@ -185,7 +217,7 @@ int main(int argc, char **argv)
     All all;
 
     // initialize world
-    initAll(all);
+    initAll(all, window);
 
     // main loop
     while (!quit)
