@@ -3,6 +3,8 @@
 #include <SDL2/SDL_image.h>
 #include <iostream>
 #include <cmath>
+#include <windows.h>
+#include <shellapi.h>
 
 // include my libraries
 #include "RenderWindow.hpp"
@@ -36,7 +38,7 @@
 struct Button {
     Vector2f position;
     Vector2f size;
-    SDL_Color color;
+    SDL_Texture *texture;
     bool pressed;
 };
 
@@ -49,8 +51,12 @@ struct All
     Button pause;
     Button nextPage;
     Button reset;
+    Button fastForward;
+    Button slowDown;
+    Button Mystery;
     bool paused;
     int indexPage;
+    float timeStepMultiplier;
 };
 
 struct mouse
@@ -61,11 +67,11 @@ struct mouse
 
 
 // init a button
-void initButton(Button &b, Vector2f position, Vector2f size, SDL_Color color)
+void initButton(Button &b, Vector2f position, Vector2f size, SDL_Texture *texture)
 {
     b.position = position;
     b.size = size;
-    b.color = color;
+    b.texture = texture;
     b.pressed = false;
 }
 
@@ -73,9 +79,12 @@ void initButton(Button &b, Vector2f position, Vector2f size, SDL_Color color)
 void initAll(All &all, RenderWindow &window) {
 
     // init all the buttons
-    initButton(all.pause, initVector2f(20, WINDOW_HEIGHT - 50), initVector2f(60, 30), {255, 0, 0, 255});
-    initButton(all.nextPage, initVector2f((WINDOW_WIDTH / 2) - 30, WINDOW_HEIGHT - 50), initVector2f(60, 30), {0, 255, 0, 255});
-    initButton(all.reset, initVector2f(WINDOW_WIDTH - 80, WINDOW_HEIGHT - 50), initVector2f(60, 30), {0, 0, 255, 255});
+    initButton(all.pause, initVector2f(70, WINDOW_HEIGHT - 50), initVector2f(60, 30), window.loadTexture("media/img/Play-button.png"));
+    initButton(all.nextPage, initVector2f((WINDOW_WIDTH / 2) - 30, WINDOW_HEIGHT - 50), initVector2f(60, 30), window.loadTexture("media/img/next-page.png"));
+    initButton(all.reset, initVector2f(WINDOW_WIDTH - 70, WINDOW_HEIGHT - 50), initVector2f(60, 30), window.loadTexture("media/img/reset.png"));
+    initButton(all.fastForward, initVector2f(110, 80), initVector2f(60, 30), window.loadTexture("media/img/fast-forward.png"));
+    initButton(all.slowDown, initVector2f(30, 80), initVector2f(60, 30), window.loadTexture("media/img/slow-down.png"));
+    initButton(all.Mystery, initVector2f(70, WINDOW_HEIGHT - 100), initVector2f(60, 30), window.loadTexture("media/img/Mystery.png"));
 
     //init textures
     all.GravityEquation = window.loadTexture("media/img/gravityEquation.png");
@@ -84,6 +93,7 @@ void initAll(All &all, RenderWindow &window) {
     all.paused = false;
     all.g.loaded = false;
     all.indexPage = 0;
+    all.timeStepMultiplier = TIMESTEPS_MULTIPLIER;
 }
 
 //init mouse
@@ -135,16 +145,22 @@ void draw(All all, RenderWindow &window) {
     drawLeftMenu(window, all);
 
     //draw the button pause
-    window.color(all.pause.color.r, all.pause.color.g, all.pause.color.b, all.pause.color.a);
-    window.drawRectangle(all.pause.position.x, all.pause.position.y, all.pause.size.x, all.pause.size.y);
+    window.drawTexture(all.pause.texture, all.pause.position.x + (all.pause.size.x / 2), all.pause.position.y + (all.pause.size.y / 2), 1);
 
     //draw the button next page
-    window.color(all.nextPage.color.r, all.nextPage.color.g, all.nextPage.color.b, all.nextPage.color.a);
-    window.drawRectangle(all.nextPage.position.x, all.nextPage.position.y, all.nextPage.size.x, all.nextPage.size.y);
+    window.drawTexture(all.nextPage.texture, all.nextPage.position.x + (all.nextPage.size.x / 2), all.nextPage.position.y + (all.nextPage.size.y / 2), 1);
 
     //draw the button reset
-    window.color(all.reset.color.r, all.reset.color.g, all.reset.color.b, all.reset.color.a);
-    window.drawRectangle(all.reset.position.x, all.reset.position.y, all.reset.size.x, all.reset.size.y);
+    window.drawTexture(all.reset.texture, all.reset.position.x + (all.reset.size.x / 2), all.reset.position.y + (all.reset.size.y / 2), 1);
+
+    //draw the button fast forward
+    window.drawTexture(all.fastForward.texture, all.fastForward.position.x + (all.fastForward.size.x / 2), all.fastForward.position.y + (all.fastForward.size.y / 2), 1);
+
+    //draw the button slow down
+    window.drawTexture(all.slowDown.texture, all.slowDown.position.x + (all.slowDown.size.x / 2), all.slowDown.position.y + (all.slowDown.size.y / 2), 1);
+
+    // draw the button mystery
+    window.drawTexture(all.Mystery.texture, all.Mystery.position.x + (all.Mystery.size.x / 2), all.Mystery.position.y + (all.Mystery.size.y / 2), 1);
 }
 
 void update(float timeStepSeconds, All &all, mouse m)
@@ -170,6 +186,7 @@ void update(float timeStepSeconds, All &all, mouse m)
         {
             all.indexPage++;
             all.nextPage.pressed = true;
+            all.timeStepMultiplier = TIMESTEPS_MULTIPLIER;
         }
         //if the left click is on the button reset, reset the galaxy
         else if (isOnRect(all.reset.position, all.reset.size , mousePos) && !all.reset.pressed)
@@ -177,6 +194,28 @@ void update(float timeStepSeconds, All &all, mouse m)
             resetGalaxy(all.g);
             initElectromagnetismArray(all.e);
             all.reset.pressed = true;
+            all.timeStepMultiplier = TIMESTEPS_MULTIPLIER;
+        }
+
+        //if the left click is on the button fast forward, increase the timestep
+        else if (isOnRect(all.fastForward.position, all.fastForward.size, mousePos) && !all.fastForward.pressed)
+        {
+            all.timeStepMultiplier += 0.1;
+            all.fastForward.pressed = true;
+        }
+
+        //if the left click is on the button slow down, decrease the timestep
+        else if (isOnRect(all.slowDown.position, all.slowDown.size, mousePos) && !all.slowDown.pressed)
+        {
+            all.timeStepMultiplier -= 0.1;
+            all.slowDown.pressed = true;
+        }
+
+        //if the left click is on the button mystery, do mystery
+        else if (isOnRect(all.Mystery.position, all.Mystery.size, mousePos) && !all.Mystery.pressed)
+        {
+            all.Mystery.pressed = true;
+            ShellExecute(0, 0, "https://www.youtube.com/watch?v=dQw4w9WgXcQ", 0, 0, SW_SHOW);
         }
     }
     else
@@ -184,7 +223,20 @@ void update(float timeStepSeconds, All &all, mouse m)
         all.pause.pressed = false;
         all.nextPage.pressed = false;
         all.reset.pressed = false;
+        all.fastForward.pressed = false;
+        all.slowDown.pressed = false;
+        all.Mystery.pressed = false;
+    }
+    if(buttons != LEFT_MOUSE_BUTTON)
         m.left = false;
+
+    if(buttons == RIGHT_MOUSE_BUTTON)
+    {
+        all.e.drawPoint = true;
+    }
+    else
+    {
+        all.e.drawPoint = false;
     }
     //if the index is supperieur to the number of pages - 1, change the index to 0
     if (all.indexPage >= NUM_PAGES)
@@ -212,11 +264,11 @@ void update(float timeStepSeconds, All &all, mouse m)
     // update the position of the planets if it's the first index
     if (all.indexPage == 0)
     {
-        updateGalaxy(timeStepSeconds, all.g, all.paused);
+        updateGalaxy(timeStepSeconds * all.timeStepMultiplier, all.g, all.paused);
     }
     else if (all.indexPage == 1)
     {
-        updateElectromagnetismArray(timeStepSeconds, all.e, all.paused);
+        updateElectromagnetismArray(timeStepSeconds * all.timeStepMultiplier, all.e, all.paused);
     }
 }
 

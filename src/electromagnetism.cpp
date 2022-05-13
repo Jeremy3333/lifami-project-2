@@ -24,6 +24,7 @@ void initElectromagnetismArray(ElectromagnetismArray &e)
     initElectromagnetism(e.particles[3], initVector2f(-15, 7), initVector2f(-16, 8), 3.9, {0, 255, 0, 255});
     initElectromagnetism(e.particles[4], initVector2f(-10, -10), initVector2f(8, 8), 8, {0, 255, 0, 255});
     e.loaded = true;
+    e.drawPoint = true;
 }
 
 // count the numbre of point who are inferior to the research answer and return an array of index of the point
@@ -83,8 +84,27 @@ void drawCalculedLine(RenderWindow &window, ElectromagnetismArray e, int i, int 
     drawPos[2] = getDrawPosition(initVector2f((i + 1) * CASE_SIZE, j * CASE_SIZE), initVector2f(0, 0));
     drawPos[3] = getDrawPosition(initVector2f((i + 1) * CASE_SIZE, (j - 1) * CASE_SIZE), initVector2f(0, 0));
     numInf = countInferior(beta, r_sqr, index);
+    if (e.drawPoint)
+    {
+        if(beta[0] <= r_sqr)
+        {
+            window.color(255, 0, 0, 255);
+        }
+        else
+        {
+            window.color(0, 255, 0, 255);
+        }
+        window.drawPoint(drawPos[0].x, drawPos[0].y);
+
+    }
+    float t = (i + (WINDOW_WIDTH / CASE_SIZE) / 2) / (WINDOW_WIDTH / CASE_SIZE);
+    window.color(255 * (1 - t) + 167 * t, 87 * (1 - t) + 4 * t, 185 * (1 - t) + 185 * t, 255);
     switch (numInf)
                 {
+                case 0:
+                    break;
+                case 4:
+                    break;
                 case 1:
                     switch (index[0])
                     {
@@ -177,8 +197,6 @@ void drawElectromagnetismArray(ElectromagnetismArray e, RenderWindow &window)
     {
         for(j = -((WINDOW_HEIGHT / CASE_SIZE)/2); j < (WINDOW_HEIGHT / CASE_SIZE)/2; j++)
         {
-            float t = (i + (WINDOW_WIDTH / CASE_SIZE)/2) / (WINDOW_WIDTH / CASE_SIZE);
-            window.color(255 * (1 - t) + 167 * t, 87 * (1 - t) + 4 * t, 185 * (1 - t) + 185 * t, 255);
             drawCalculedLine(window, e, i, j);
         }
     }

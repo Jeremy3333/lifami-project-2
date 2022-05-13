@@ -23,6 +23,7 @@ struct ElectromagnetismArray {
     Electromagnetism particles[MAX_ELECTROMAGNETS];
     int nbParticles;
     bool loaded;
+    bool drawPoint;
 };
 
 void initElectromagnetism(Electromagnetism &e, Vector2f position, Vector2f velocity, double radius, SDL_Color color);
