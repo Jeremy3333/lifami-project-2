@@ -16,6 +16,7 @@
 struct Planet {
     Vector2f position; // position de la planète
     Vector2f velocity; // vélocité de la planète
+    Vector2f acceleration; // accélération de la planète
     double mass; // masse de la planète
     double radius; // rayon de la planète
     SDL_Color color; // couleur de la planète

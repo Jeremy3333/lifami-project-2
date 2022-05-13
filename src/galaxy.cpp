@@ -14,6 +14,7 @@ Planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radi
     Planet p;
     p.position = position;
     p.velocity = velocity;
+    p.acceleration = initVector2f(0, 0);
     p.mass = mass;
     p.radius = radius;
     p.color = color;
@@ -34,10 +35,10 @@ Planet initPlanet(Vector2f position, Vector2f velocity, double mass, double radi
 //init galaxy with 4 planets and no selected planet
 void initGalaxy(Galaxy &g) {
     g.nbPlanets = 4;
-    g.planets[0] = initPlanet(initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), initVector2f(0, 0), 20000000000000, 10, {255, 255, 255, 255}, false, {255, 0, 0, 255});
-    g.planets[1] = initPlanet(initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2), initVector2f(0, 20), 20000000000, 5, {255, 255, 100, 255}, true, {255, 0, 0, 255});
-    g.planets[2] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2), initVector2f(0, -20), 200000000000, 7, {255, 255, 100, 255}, true, {255, 0, 0, 255});
-    g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -11), 200000, 3,{255, 255, 100, 255}, true , {255, 0, 0, 255});
+    g.planets[0] = initPlanet(initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), initVector2f(0, 0), 20000000000000, 10, {255, 255, 255, 255}, false, {0, 255, 0, 255});
+    g.planets[1] = initPlanet(initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2), initVector2f(0, 20), 20000000000, 5, {255, 255, 100, 255}, true, {0, 255, 0, 255});
+    g.planets[2] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2), initVector2f(0, -20), 200000000000, 7, {255, 255, 100, 255}, true, {0, 255, 0, 255});
+    g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -11), 200000, 3, {255, 255, 100, 255}, true, {0, 255, 0, 255});
 
     g.selectedPlanet = -1;
     g.loaded = true;
@@ -60,10 +61,10 @@ void initTrace (Galaxy &g)
 void resetGalaxy(Galaxy &g)
 {
     g.nbPlanets = 4;
-    g.planets[0] = initPlanet(initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), initVector2f(0, 0), 20000000000000, 10, {255, 255, 100, 255}, true, {255, 0, 0, 255});
-    g.planets[1] = initPlanet(initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2), initVector2f(0, 20), 20000000000, 5, {255, 255, 100, 255}, true, {255, 0, 0, 255});
-    g.planets[2] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2), initVector2f(0, -20), 200000000000, 7, {255, 255, 100, 255}, true, {255, 0, 0, 255});
-    g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -11), 200000, 3,{255, 255, 100, 255}, true , {255, 0, 0, 255});
+    g.planets[0] = initPlanet(initVector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), initVector2f(0, 0), 20000000000000, 10, {255, 255, 100, 255}, true, {0, 255, 0, 255});
+    g.planets[1] = initPlanet(initVector2f(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2), initVector2f(0, 20), 20000000000, 5, {255, 255, 100, 255}, true, {0, 255, 0, 255});
+    g.planets[2] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 150, WINDOW_HEIGHT / 2), initVector2f(0, -20), 200000000000, 7, {255, 255, 100, 255}, true, {0, 255, 0, 255});
+    g.planets[3] = initPlanet(initVector2f(WINDOW_WIDTH / 2 + 160, WINDOW_HEIGHT / 2), initVector2f(0, -11), 200000, 3, {255, 255, 100, 255}, true, {0, 255, 0, 255});
 }
 
 //draw the galaxy if the index is 0
@@ -84,15 +85,24 @@ void drawGalaxy(Galaxy g, RenderWindow &window)
         window.color(g.planets[i].color.r, g.planets[i].color.g, g.planets[i].color.b, g.planets[i].color.a);
         Vector2f drawPosition = getDrawPosition(g.planets[i].position , g.centerDraw);
         window.fillCircle(drawPosition.x, drawPosition.y, g.planets[i].radius);
+        if(g.planets[i].moveable)
+        {
+            window.color(0, 0, 255, 255);
+            window.drawLine(drawPosition.x, drawPosition.y, drawPosition.x + (g.planets[i].velocity.x / 2), drawPosition.y + (g.planets[i].velocity.y / 2));
+            window.color(255, 0, 0, 255);
+            window.drawLine(drawPosition.x, drawPosition.y, drawPosition.x + (g.planets[i].acceleration.x * 100), drawPosition.y + (g.planets[i].acceleration.y * 100));
+        }
     }
 }
 
 // calculate the force between all planets with gForce function
 void calculateForces(Galaxy &g) {
     for (int i = 0; i < g.nbPlanets; i++) {
+        g.planets[i].acceleration = initVector2f(0, 0);
         for (int j = 0; j < g.nbPlanets; j++) {
             if (i != j) {
                 g.planets[i].velocity = g.planets[i].velocity + gForce(g.planets[i], g.planets[j]) / g.planets[i].mass;
+                g.planets[i].acceleration += gForce(g.planets[i], g.planets[j]) / g.planets[i].mass;
             }
         }
     }

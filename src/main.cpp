@@ -53,6 +53,13 @@ struct All
     int indexPage;
 };
 
+struct mouse
+{
+    bool left;
+    bool right;
+};
+
+
 // init a button
 void initButton(Button &b, Vector2f position, Vector2f size, SDL_Color color)
 {
@@ -79,8 +86,14 @@ void initAll(All &all, RenderWindow &window) {
     all.indexPage = 0;
 }
 
+//init mouse
+void initMouse(mouse &m) {
+    m.left = false;
+    m.right = false;
+}
+
 //draw left menu
-void drawLeftMenu(RenderWindow &window, All &all) 
+void drawLeftMenu(RenderWindow &window, All &all)
 {
 
     window.color(200, 200, 200, 255);
@@ -134,7 +147,7 @@ void draw(All all, RenderWindow &window) {
     window.drawRectangle(all.reset.position.x, all.reset.position.y, all.reset.size.x, all.reset.size.y);
 }
 
-void update(float timeStepSeconds, All &all)
+void update(float timeStepSeconds, All &all, mouse m)
 {
     // increase the timestep
     timeStepSeconds *= TIMESTEPS_MULTIPLIER;
@@ -142,8 +155,9 @@ void update(float timeStepSeconds, All &all)
     // check if the button are clicked
     int x, y;
     const Uint32 buttons = SDL_GetMouseState(&x, &y);
-    if (buttons == LEFT_MOUSE_BUTTON)
+    if (buttons == LEFT_MOUSE_BUTTON && !m.left)
     {
+        m.left = true;
         Vector2f mousePos = initVector2f(x, y);
         //if the left click is on the button next page, change the page
         if (isOnRect(all.pause.position, all.pause.size, mousePos) && !all.pause.pressed)
@@ -170,6 +184,7 @@ void update(float timeStepSeconds, All &all)
         all.pause.pressed = false;
         all.nextPage.pressed = false;
         all.reset.pressed = false;
+        m.left = false;
     }
     //if the index is supperieur to the number of pages - 1, change the index to 0
     if (all.indexPage >= NUM_PAGES)
@@ -215,9 +230,11 @@ int main(int argc, char **argv)
     const Uint8 *state = SDL_GetKeyboardState(NULL);
     bool quit = false;
     All all;
+    mouse m;
 
     // initialize world
     initAll(all, window);
+    initMouse(m);
 
     // main loop
     while (!quit)
@@ -238,7 +255,7 @@ int main(int argc, char **argv)
         window.clear();
 
         // update game
-        update(timeStepS, all);
+        update(timeStepS, all, m);
 
         // draw
         draw(all, window);
