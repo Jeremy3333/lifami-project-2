@@ -1,16 +1,16 @@
 #pragma once
 
 // include public libraries
-#include <SDL2/SDL.h>
+#include <SDL2/SDL.h> // SDL_Rect, SDL_Color, SDL_Point
 
 // include my libraries
-#include "Math.hpp"
-#include "RenderWindow.hpp"
+#include "Math.hpp" // Vector2f,  initVector2f
+#include "RenderWindow.hpp" // for the window
 
 // define global variables
-#define MAX_PLANETS 10
-#define G 6.67408e-11
-#define MAX_TRACE_LENGTH 2000
+#define MAX_PLANETS 10 // max number of planets
+#define G 6.67408e-11 // gravitational constant
+#define MAX_TRACE_LENGTH 2000 // max length of the trace
 
 // define structs
 struct Planet {

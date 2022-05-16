@@ -3,8 +3,6 @@
 #include <SDL2/SDL_image.h>
 #include <iostream>
 #include <cmath>
-#include <windows.h>
-#include <shellapi.h>
 
 // include my libraries
 #include "RenderWindow.hpp"
@@ -53,7 +51,7 @@ struct All
     Button reset;
     Button fastForward;
     Button slowDown;
-    Button Mystery;
+    SDL_Texture *leftClick;
     bool paused;
     int indexPage;
     float timeStepMultiplier;
@@ -79,16 +77,17 @@ void initButton(Button &b, Vector2f position, Vector2f size, SDL_Texture *textur
 void initAll(All &all, RenderWindow &window) {
 
     // init all the buttons
-    initButton(all.pause, initVector2f(70, WINDOW_HEIGHT - 50), initVector2f(60, 30), window.loadTexture("media/img/Play-button.png"));
-    initButton(all.nextPage, initVector2f((WINDOW_WIDTH / 2) - 30, WINDOW_HEIGHT - 50), initVector2f(60, 30), window.loadTexture("media/img/next-page.png"));
-    initButton(all.reset, initVector2f(WINDOW_WIDTH - 70, WINDOW_HEIGHT - 50), initVector2f(60, 30), window.loadTexture("media/img/reset.png"));
-    initButton(all.fastForward, initVector2f(110, 80), initVector2f(60, 30), window.loadTexture("media/img/fast-forward.png"));
-    initButton(all.slowDown, initVector2f(30, 80), initVector2f(60, 30), window.loadTexture("media/img/slow-down.png"));
-    initButton(all.Mystery, initVector2f(70, WINDOW_HEIGHT - 100), initVector2f(60, 30), window.loadTexture("media/img/Mystery.png"));
+    initButton(all.pause, initVector2f(70, WINDOW_HEIGHT - 50), initVector2f(60, 30), window.loadTexture("data/Play-button.png"));
+    initButton(all.nextPage, initVector2f((WINDOW_WIDTH / 2) - 30, WINDOW_HEIGHT - 50), initVector2f(60, 30), window.loadTexture("data/next-page.png"));
+    initButton(all.reset, initVector2f(WINDOW_WIDTH - 70, WINDOW_HEIGHT - 50), initVector2f(60, 30), window.loadTexture("data/reset.png"));
+    initButton(all.fastForward, initVector2f(110, 80), initVector2f(60, 30), window.loadTexture("data/fast-forward.png"));
+    initButton(all.slowDown, initVector2f(30, 80), initVector2f(60, 30), window.loadTexture("data/slow-down.png"));
+
+    all.leftClick = window.loadTexture("data/left-click.png");
 
     //init textures
-    all.GravityEquation = window.loadTexture("media/img/gravityEquation.png");
-    all.ElectromagnetismEquation = window.loadTexture("media/img/electromagnetismEquationSomme.png");
+    all.GravityEquation = window.loadTexture("data/gravityEquation.png");
+    all.ElectromagnetismEquation = window.loadTexture("data/electromagnetismEquationSomme.png");
 
     all.paused = false;
     all.g.loaded = false;
@@ -116,10 +115,18 @@ void drawLeftMenu(RenderWindow &window, All &all)
     if (all.indexPage == 0)
     {
         window.drawTexture(all.GravityEquation, 100, 30, 1);
+        window.color(255, 255, 100, 255);
+        window.fillCircle(15, 152, 10);
+        window.drawTexture(all.leftClick, 50, 150, 0.1);
+        window.fillCircle(15, 182, 10);
+        window.drawTextureFlip(all.leftClick, 50, 180, 0.1);
     }
     else if (all.indexPage == 1)
     {
         window.drawTexture(all.ElectromagnetismEquation, 100, 30, 0.7);
+        window.color(50, 50, 50, 255);
+        window.drawRectangle(10, 173, 20, 20);
+        window.drawTextureFlip(all.leftClick, 45, 180, 0.1);
     }
 
     window.color(50, 50, 50, 255);
@@ -158,9 +165,6 @@ void draw(All all, RenderWindow &window) {
 
     //draw the button slow down
     window.drawTexture(all.slowDown.texture, all.slowDown.position.x + (all.slowDown.size.x / 2), all.slowDown.position.y + (all.slowDown.size.y / 2), 1);
-
-    // draw the button mystery
-    window.drawTexture(all.Mystery.texture, all.Mystery.position.x + (all.Mystery.size.x / 2), all.Mystery.position.y + (all.Mystery.size.y / 2), 1);
 }
 
 void update(float timeStepSeconds, All &all, mouse m)
@@ -210,13 +214,6 @@ void update(float timeStepSeconds, All &all, mouse m)
             all.timeStepMultiplier -= 0.1;
             all.slowDown.pressed = true;
         }
-
-        //if the left click is on the button mystery, do mystery
-        else if (isOnRect(all.Mystery.position, all.Mystery.size, mousePos) && !all.Mystery.pressed)
-        {
-            all.Mystery.pressed = true;
-            ShellExecute(0, 0, "https://www.youtube.com/watch?v=dQw4w9WgXcQ", 0, 0, SW_SHOW);
-        }
     }
     else
     {
@@ -225,7 +222,6 @@ void update(float timeStepSeconds, All &all, mouse m)
         all.reset.pressed = false;
         all.fastForward.pressed = false;
         all.slowDown.pressed = false;
-        all.Mystery.pressed = false;
     }
     if(buttons != LEFT_MOUSE_BUTTON)
         m.left = false;

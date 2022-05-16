@@ -71,7 +71,7 @@ void calculateEquation(float beta[5], float & r_sqr, ElectromagnetismArray e, in
     beta[4] = -1;
 }
 
-void drawCalculedLine(RenderWindow &window, ElectromagnetismArray e, int i, int j)
+void drawCalculedLine(RenderWindow &window, ElectromagnetismArray e, float i, int j)
 {
     int numInf;
     int index[4];
@@ -97,8 +97,8 @@ void drawCalculedLine(RenderWindow &window, ElectromagnetismArray e, int i, int 
         window.drawPoint(drawPos[0].x, drawPos[0].y);
 
     }
-    float t = (i + (WINDOW_WIDTH / CASE_SIZE) / 2) / (WINDOW_WIDTH / CASE_SIZE);
-    window.color(255 * (1 - t) + 167 * t, 87 * (1 - t) + 4 * t, 185 * (1 - t) + 185 * t, 255);
+    float t = (i - ((WINDOW_WIDTH - LEFT_MENU_WIDTH) / CASE_SIZE) / ((WINDOW_WIDTH - LEFT_MENU_WIDTH)/ CASE_SIZE)) + 0.5;
+    window.color(255 * (1 - t) + 0 * t, 0, 0 * (1 - t) + 255 * t, 255);
     switch (numInf)
                 {
                 case 0:
@@ -193,7 +193,7 @@ void drawCalculedLine(RenderWindow &window, ElectromagnetismArray e, int i, int 
 void drawElectromagnetismArray(ElectromagnetismArray e, RenderWindow &window)
 {
     float i, j;
-    for(i = -((WINDOW_WIDTH / CASE_SIZE)/2); i < (WINDOW_WIDTH / CASE_SIZE)/2; i++)
+    for(i = -(((WINDOW_WIDTH - LEFT_MENU_WIDTH) / CASE_SIZE)/2); i < ((WINDOW_WIDTH - LEFT_MENU_WIDTH) / CASE_SIZE)/2; i++)
     {
         for(j = -((WINDOW_HEIGHT / CASE_SIZE)/2); j < (WINDOW_HEIGHT / CASE_SIZE)/2; j++)
         {
@@ -210,7 +210,7 @@ void updateElectromagnetismArray(float timeStepSeconds, ElectromagnetismArray &e
         {
             e.particles[i].position += e.particles[i].velocity * timeStepSeconds;
             //verifie if the particle is outside the screen and if it is, inverse its velocity
-            if(e.particles[i].position.x - e.particles[i].radius < -((WINDOW_WIDTH / CASE_SIZE)/2) || e.particles[i].position.x + e.particles[i].radius > (WINDOW_WIDTH/CASE_SIZE)/2)
+            if(e.particles[i].position.x - e.particles[i].radius < -(((WINDOW_WIDTH - LEFT_MENU_WIDTH) / CASE_SIZE)/2) || e.particles[i].position.x + e.particles[i].radius > ((WINDOW_WIDTH - LEFT_MENU_WIDTH)/CASE_SIZE)/2)
             {
                 e.particles[i].velocity.x *= -1;
             }

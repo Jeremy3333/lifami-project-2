@@ -19,6 +19,7 @@ public:
     void drawPoint(float x, float y);
     void drawBackground();
     void drawTexture(SDL_Texture *p_texture, int p_x, int p_y, float heightModifier);
+    void drawTextureFlip(SDL_Texture *p_texture, int p_x, int p_y, float heightModifier);
     void drawTextureRect(SDL_Texture *p_texture, int p_x, int p_y, float heightModifier, SDL_Rect p_rect);
     void drawTextureRectFlip(SDL_Texture *p_texture, int p_x, int p_y, float heightModifier, SDL_Rect p_rect);
     void textureFlip(SDL_Texture *p_texture);

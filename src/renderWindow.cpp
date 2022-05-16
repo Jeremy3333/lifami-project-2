@@ -161,6 +161,19 @@ void RenderWindow::drawTexture(SDL_Texture *p_texture, int p_x, int p_y, float h
     SDL_RenderCopy(renderer, p_texture, NULL, &rect);
 }
 
+void RenderWindow::drawTextureFlip(SDL_Texture *p_texture, int p_x, int p_y, float heightModifier)
+{
+    SDL_Rect rect;
+    rect.x = p_x;
+    rect.y = p_y;
+    SDL_QueryTexture(p_texture, NULL, NULL, &rect.w, &rect.h);
+    rect.w *= heightModifier;
+    rect.h *= heightModifier;
+    rect.x -= rect.w / 2;
+    rect.y -= rect.h / 2;
+    SDL_RenderCopyEx(renderer, p_texture, NULL, &rect, 0, NULL, SDL_FLIP_HORIZONTAL);
+}
+
 void RenderWindow::drawTextureRect(SDL_Texture *p_texture, int p_x, int p_y, float heightModifier, SDL_Rect p_rect)
 {
     SDL_Rect rect;
