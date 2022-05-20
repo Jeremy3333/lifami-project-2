@@ -11,7 +11,6 @@
 #include "Utils.hpp"
 #include "Electromagnetism.hpp"
 
-
 // define global variables
 #define TIMESTEPS_MULTIPLIER 1
 #define WINDOW_TITLE "LIFAMI-Project"
@@ -33,7 +32,8 @@
  */
 
 // define structs
-struct Button {
+struct Button
+{
     Vector2f position;
     Vector2f size;
     SDL_Texture *texture;
@@ -63,7 +63,6 @@ struct mouse
     bool right;
 };
 
-
 // init a button
 void initButton(Button &b, Vector2f position, Vector2f size, SDL_Texture *texture)
 {
@@ -73,8 +72,9 @@ void initButton(Button &b, Vector2f position, Vector2f size, SDL_Texture *textur
     b.pressed = false;
 }
 
-//init all
-void initAll(All &all, RenderWindow &window) {
+// init all
+void initAll(All &all, RenderWindow &window)
+{
 
     // init all the buttons
     initButton(all.pause, initVector2f(70, WINDOW_HEIGHT - 50), initVector2f(60, 30), window.loadTexture("data/Play-button.png"));
@@ -85,7 +85,7 @@ void initAll(All &all, RenderWindow &window) {
 
     all.leftClick = window.loadTexture("data/left-click.png");
 
-    //init textures
+    // init textures
     all.GravityEquation = window.loadTexture("data/gravityEquation.png");
     all.ElectromagnetismEquation = window.loadTexture("data/electromagnetismEquationSomme.png");
 
@@ -95,13 +95,14 @@ void initAll(All &all, RenderWindow &window) {
     all.timeStepMultiplier = TIMESTEPS_MULTIPLIER;
 }
 
-//init mouse
-void initMouse(mouse &m) {
+// init mouse
+void initMouse(mouse &m)
+{
     m.left = false;
     m.right = false;
 }
 
-//draw left menu
+// draw left menu
 void drawLeftMenu(RenderWindow &window, All &all)
 {
 
@@ -134,7 +135,8 @@ void drawLeftMenu(RenderWindow &window, All &all)
 }
 
 // draw the planet on the screen
-void draw(All all, RenderWindow &window) {
+void draw(All all, RenderWindow &window)
+{
 
     window.color(50, 50, 50, 255);
     window.drawBackground();
@@ -144,26 +146,26 @@ void draw(All all, RenderWindow &window) {
     {
         drawGalaxy(all.g, window);
     }
-    else if(all.indexPage == 1)
+    else if (all.indexPage == 1)
     {
         drawElectromagnetismArray(all.e, window);
     }
 
     drawLeftMenu(window, all);
 
-    //draw the button pause
+    // draw the button pause
     window.drawTexture(all.pause.texture, all.pause.position.x + (all.pause.size.x / 2), all.pause.position.y + (all.pause.size.y / 2), 1);
 
-    //draw the button next page
+    // draw the button next page
     window.drawTexture(all.nextPage.texture, all.nextPage.position.x + (all.nextPage.size.x / 2), all.nextPage.position.y + (all.nextPage.size.y / 2), 1);
 
-    //draw the button reset
+    // draw the button reset
     window.drawTexture(all.reset.texture, all.reset.position.x + (all.reset.size.x / 2), all.reset.position.y + (all.reset.size.y / 2), 1);
 
-    //draw the button fast forward
+    // draw the button fast forward
     window.drawTexture(all.fastForward.texture, all.fastForward.position.x + (all.fastForward.size.x / 2), all.fastForward.position.y + (all.fastForward.size.y / 2), 1);
 
-    //draw the button slow down
+    // draw the button slow down
     window.drawTexture(all.slowDown.texture, all.slowDown.position.x + (all.slowDown.size.x / 2), all.slowDown.position.y + (all.slowDown.size.y / 2), 1);
 }
 
@@ -179,21 +181,21 @@ void update(float timeStepSeconds, All &all, mouse m)
     {
         m.left = true;
         Vector2f mousePos = initVector2f(x, y);
-        //if the left click is on the button next page, change the page
+        // if the left click is on the button next page, change the page
         if (isOnRect(all.pause.position, all.pause.size, mousePos) && !all.pause.pressed)
         {
             all.paused = !all.paused;
             all.pause.pressed = true;
         }
-        //if the left click is on the button next page, change the page
+        // if the left click is on the button next page, change the page
         else if (isOnRect(all.nextPage.position, all.nextPage.size, mousePos) && !all.nextPage.pressed)
         {
             all.indexPage++;
             all.nextPage.pressed = true;
             all.timeStepMultiplier = TIMESTEPS_MULTIPLIER;
         }
-        //if the left click is on the button reset, reset the galaxy
-        else if (isOnRect(all.reset.position, all.reset.size , mousePos) && !all.reset.pressed)
+        // if the left click is on the button reset, reset the galaxy
+        else if (isOnRect(all.reset.position, all.reset.size, mousePos) && !all.reset.pressed)
         {
             resetGalaxy(all.g);
             initElectromagnetismArray(all.e);
@@ -201,14 +203,14 @@ void update(float timeStepSeconds, All &all, mouse m)
             all.timeStepMultiplier = TIMESTEPS_MULTIPLIER;
         }
 
-        //if the left click is on the button fast forward, increase the timestep
+        // if the left click is on the button fast forward, increase the timestep
         else if (isOnRect(all.fastForward.position, all.fastForward.size, mousePos) && !all.fastForward.pressed)
         {
             all.timeStepMultiplier += 0.1;
             all.fastForward.pressed = true;
         }
 
-        //if the left click is on the button slow down, decrease the timestep
+        // if the left click is on the button slow down, decrease the timestep
         else if (isOnRect(all.slowDown.position, all.slowDown.size, mousePos) && !all.slowDown.pressed)
         {
             all.timeStepMultiplier -= 0.1;
@@ -223,10 +225,10 @@ void update(float timeStepSeconds, All &all, mouse m)
         all.fastForward.pressed = false;
         all.slowDown.pressed = false;
     }
-    if(buttons != LEFT_MOUSE_BUTTON)
+    if (buttons != LEFT_MOUSE_BUTTON)
         m.left = false;
 
-    if(buttons == RIGHT_MOUSE_BUTTON)
+    if (buttons == RIGHT_MOUSE_BUTTON)
     {
         all.e.drawPoint = true;
     }
@@ -234,7 +236,7 @@ void update(float timeStepSeconds, All &all, mouse m)
     {
         all.e.drawPoint = false;
     }
-    //if the index is supperieur to the number of pages - 1, change the index to 0
+    // if the index is supperieur to the number of pages - 1, change the index to 0
     if (all.indexPage >= NUM_PAGES)
     {
         all.indexPage = 0;

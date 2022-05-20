@@ -11,7 +11,8 @@
 #define CASE_SIZE 5
 
 // define struct of electromagnetic particle
-struct Electromagnetism {
+struct Electromagnetism
+{
     Vector2f position;
     Vector2f velocity;
     double radius;
@@ -19,7 +20,8 @@ struct Electromagnetism {
 };
 
 // define struct of many electromagnetic particles
-struct ElectromagnetismArray {
+struct ElectromagnetismArray
+{
     Electromagnetism particles[MAX_ELECTROMAGNETS];
     int nbParticles;
     bool loaded;
