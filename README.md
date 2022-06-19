@@ -6,8 +6,6 @@ Mon objectif est de faire un programme qui permet de faire une simulation de gra
 
 afin de plus facilement comprendre quel includes sont mes code ou des librerie publiques j'ai indiquer en commentaire en dessus et aussi les librairies publique ont leur nom entre <> et ce que j'ai codé moi est entre ""
 
-je m'excuse pour l'anglais en commentaire.
-
 ---
 
 ## - Fonctionnement
